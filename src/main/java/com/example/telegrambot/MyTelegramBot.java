@@ -20,6 +20,9 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     private final String BOT_USERNAME = Config.getBotUsername();
     private final String BOT_TOKEN = Config.getBotToken();
     
+    // Ссылка на группу для оплаты
+    private static final String PAYMENT_GROUP_LINK = "https://t.me/+MMkALipObugzNjNi";
+    
     // Менеджер текстовых и кнопочных команд (паттерн Command)
     private final CommandManager commandManager;
     
@@ -650,13 +653,92 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         // Создаем заказ
         String orderId = OrderManager.createOrder(chatId, cart.getItems(), totalAmount);
         
-        sendMessage(chatId, "✅ Заказ #" + orderId + " оформлен!\n" +
-                "💰 Сумма: " + String.format("%.2f", totalAmount) + "₽\n\n" +
-                "С вами свяжется менеджер для подтверждения заказа.");
+        // Проверяем блокчейн транзакцию
+        boolean blockchainSuccess = processBlockchainTransaction(orderId, totalAmount);
         
-        // Очищаем корзину после оформления заказа
+        if (blockchainSuccess) {
+            // Успешная транзакция - показываем ссылку на группу
+            String successMessage = "✅ Заказ #" + orderId + " оформлен!\n" +
+                    "💰 Сумма: " + String.format("%.2f", totalAmount) + "₽\n\n" +
+                    "🔗 Перейдите по ссылке для оплаты:";
+            
+            InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+            List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+            
+            List<InlineKeyboardButton> paymentRow = new ArrayList<>();
+            InlineKeyboardButton paymentButton = new InlineKeyboardButton();
+            paymentButton.setText("💳 Перейти к оплате");
+            paymentButton.setUrl(PAYMENT_GROUP_LINK);
+            paymentRow.add(paymentButton);
+            keyboard.add(paymentRow);
+            
+            markup.setKeyboard(keyboard);
+            
+            SendMessage message = new SendMessage();
+            message.setChatId(chatId);
+            message.setText(successMessage);
+            message.setReplyMarkup(markup);
+            
+            try {
+                execute(message);
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
+        } else {
+            // Ошибка блокчейна - возврат средств, ссылка не показывается
+            String errorMessage = "❌ Ошибка при обработке транзакции на блокчейне!\n\n" +
+                    "💰 Заказ #" + orderId + " отменен.\n" +
+                    "💵 Средства будут возвращены автоматически в течение 24 часов.\n\n" +
+                    "Попробуйте оформить заказ позже или обратитесь в поддержку.";
+            
+            sendMessage(chatId, errorMessage);
+            
+            // Отменяем заказ
+            Order order = OrderManager.getOrder(orderId);
+            if (order != null) {
+                order.setStatus(Order.OrderStatus.CANCELLED);
+            }
+            
+            // Не очищаем корзину, чтобы пользователь мог попробовать снова
+            return;
+        }
+        
+        // Очищаем корзину после успешного оформления заказа
         cart.clear();
         userCarts.put(chatId, cart);
+    }
+    
+    /**
+     * Обрабатывает транзакцию на блокчейне
+     * @param orderId ID заказа
+     * @param amount Сумма транзакции
+     * @return true если транзакция успешна, false при ошибке
+     */
+    private boolean processBlockchainTransaction(String orderId, double amount) {
+        try {
+            // Симуляция проверки блокчейна
+            // В реальной реализации здесь будет интеграция с блокчейн API
+            
+            // Имитация случайной ошибки (5% вероятность ошибки для тестирования)
+            // В продакшене это должно быть реальной проверкой блокчейна
+            Random random = new Random();
+            boolean hasError = random.nextInt(100) < 5; // 5% вероятность ошибки
+            
+            if (hasError) {
+                // Симуляция ошибки блокчейна
+                System.out.println("Blockchain error for order: " + orderId);
+                return false;
+            }
+            
+            // Симуляция успешной транзакции
+            System.out.println("Blockchain transaction successful for order: " + orderId + ", amount: " + amount);
+            return true;
+            
+        } catch (Exception e) {
+            // Обработка исключений при работе с блокчейном
+            System.err.println("Blockchain processing error: " + e.getMessage());
+            return false;
+        }
     }
     
     private void clearCart(long chatId) {
