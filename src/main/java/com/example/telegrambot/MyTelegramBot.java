@@ -2,6 +2,10 @@ package com.example.telegrambot;
 
 import com.example.telegrambot.commands.CommandManager;
 import com.example.telegrambot.factory.KeyboardFactory;
+import com.example.telegrambot.payment.PaymentMethod;
+import com.example.telegrambot.payment.PaymentMethodFactory;
+import com.example.telegrambot.payment.PaymentProcessor;
+import com.example.telegrambot.payment.PaymentResult;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -20,17 +24,20 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     private final String BOT_USERNAME = Config.getBotUsername();
     private final String BOT_TOKEN = Config.getBotToken();
     
-    // Ссылка на группу для оплаты
+    // Payment group link
     private static final String PAYMENT_GROUP_LINK = "https://t.me/+MMkALipObugzNjNi";
     
-    // Менеджер текстовых и кнопочных команд (паттерн Command)
+    // Command manager (Command pattern)
     private final CommandManager commandManager;
     
-    // Хранилище корзин пользователей
+    // User carts storage
     private final Map<Long, Cart> userCarts = new HashMap<>();
     
-    // Каталог товаров
+    // Product catalog
     private final Map<String, List<Product>> categories = new HashMap<>();
+    
+    // Pending orders for payment method selection
+    private final Map<Long, String> pendingOrders = new HashMap<>();
     
     public MyTelegramBot() {
         this.commandManager = new CommandManager(this);
@@ -53,9 +60,9 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             String messageText = update.getMessage().getText();
             long chatId = update.getMessage().getChatId();
             
-            // Сначала пытаемся обработать через CommandManager (паттерн Command)
+            // Try to process through CommandManager first (Command pattern)
             if (!commandManager.executeCommand(messageText, chatId)) {
-                // Если это не известная команда — пробуем обработать как поисковый запрос
+                // If not a known command, try to process as search query
                 if (messageText.length() > 1 && !messageText.startsWith("/")) {
                     searchProducts(chatId, messageText);
                 } else {
@@ -94,7 +101,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     }
     
     private void sendMainMenu(long chatId) {
-        // Получаем все товары из всех категорий
+        // Get all products from all categories
         List<Product> allProducts = new ArrayList<>();
         for (List<Product> productList : categories.values()) {
             allProducts.addAll(productList);
@@ -105,12 +112,12 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             return;
         }
         
-        // Создаем красивую витрину всех товаров
+        // Create beautiful showcase of all products
         StringBuilder showcaseText = new StringBuilder();
         showcaseText.append("🛍️ *Fredo Store - Все товары*\n\n");
         showcaseText.append("Выберите товар для добавления в корзину:\n\n");
         
-        // Группируем товары по 2 в ряд для красивого отображения
+        // Group products by 2 per row for beautiful display
         for (int i = 0; i < allProducts.size(); i += 2) {
             Product product1 = allProducts.get(i);
             showcaseText.append(formatProductForShowcase(product1));
@@ -125,18 +132,18 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         
-        // Создаем кнопки для каждого товара
+        // Create buttons for each product
         for (int i = 0; i < allProducts.size(); i += 2) {
             List<InlineKeyboardButton> row = new ArrayList<>();
             
-            // Первый товар в ряду
+            // First product in row
             Product product1 = allProducts.get(i);
             InlineKeyboardButton button1 = new InlineKeyboardButton();
             button1.setText("🛒 " + product1.getName());
             button1.setCallbackData("product_" + product1.getId());
             row.add(button1);
             
-            // Второй товар в ряду (если есть)
+            // Second product in row (if exists)
             if (i + 1 < allProducts.size()) {
                 Product product2 = allProducts.get(i + 1);
                 InlineKeyboardButton button2 = new InlineKeyboardButton();
@@ -148,7 +155,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             keyboard.add(row);
         }
         
-        // Добавляем кнопку корзины
+        // Add cart button
         List<InlineKeyboardButton> bottomRow = new ArrayList<>();
         InlineKeyboardButton cartButton = new InlineKeyboardButton();
         cartButton.setText("🛒 Корзина");
@@ -182,7 +189,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     }
     
     private String getProductEmoji(String productName) {
-        // Возвращаем соответствующий эмодзи для товара
+        // Return corresponding emoji for product
         if (productName.contains("Пицца")) return "🍕";
         if (productName.contains("Чизбургер")) return "🍔";
         if (productName.contains("Капучино")) return "☕";
@@ -213,7 +220,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         if (productName.contains("витамины")) return "💊";
         if (productName.contains("маска")) return "🎭";
         
-        return "📦"; // Эмодзи по умолчанию
+        return "📦"; // Default emoji
     }
     
     private void sendProductDetails(long chatId, String productId) {
@@ -233,7 +240,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         
-        // Кнопки для добавления в корзину
+        // Buttons for adding to cart
         List<InlineKeyboardButton> addRow = new ArrayList<>();
         InlineKeyboardButton addButton = new InlineKeyboardButton();
         addButton.setText("🛒 Добавить в корзину");
@@ -241,7 +248,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         addRow.add(addButton);
         keyboard.add(addRow);
         
-        // Кнопка "Назад"
+        // Back button
         List<InlineKeyboardButton> backRow = new ArrayList<>();
         InlineKeyboardButton backButton = new InlineKeyboardButton();
         backButton.setText("⬅️ Назад к товарам");
@@ -323,7 +330,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         
-        // Кнопка "Оформить заказ"
+        // Checkout button
         List<InlineKeyboardButton> orderRow = new ArrayList<>();
         InlineKeyboardButton orderButton = new InlineKeyboardButton();
         orderButton.setText("✅ Оформить заказ");
@@ -331,7 +338,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         orderRow.add(orderButton);
         keyboard.add(orderRow);
         
-        // Кнопки управления корзиной
+        // Cart management buttons
         List<InlineKeyboardButton> manageRow = new ArrayList<>();
         InlineKeyboardButton clearButton = new InlineKeyboardButton();
         clearButton.setText("🗑️ Очистить корзину");
@@ -369,7 +376,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         
         StringBuilder ordersText = new StringBuilder("📋 Ваши заказы:\n\n");
         
-        // Создаем карту товаров для форматирования
+        // Create product map for formatting
         Map<String, Product> productsMap = new HashMap<>();
         for (List<Product> productList : categories.values()) {
             for (Product product : productList) {
@@ -384,7 +391,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         
-        // Кнопка "Назад в меню"
+        // Back to menu button
         List<InlineKeyboardButton> backRow = new ArrayList<>();
         InlineKeyboardButton backButton = new InlineKeyboardButton();
         backButton.setText("⬅️ Назад в меню");
@@ -474,7 +481,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         List<Product> searchResults = new ArrayList<>();
         String lowerQuery = query.toLowerCase();
         
-        // Поиск по всем товарам
+        // Search through all products
         for (List<Product> productList : categories.values()) {
             for (Product product : productList) {
                 if (product.getName().toLowerCase().contains(lowerQuery) ||
@@ -519,12 +526,12 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             return;
         }
         
-        // Показываем результаты поиска
+        // Show search results
         StringBuilder searchText = new StringBuilder();
         searchText.append("🔍 *Результаты поиска по запросу: \"").append(query).append("\"*\n\n");
         searchText.append("Найдено товаров: ").append(searchResults.size()).append("\n\n");
         
-        // Группируем результаты по 2 в ряд
+        // Group results by 2 per row
         for (int i = 0; i < searchResults.size(); i += 2) {
             Product product1 = searchResults.get(i);
             searchText.append(formatProductForShowcase(product1));
@@ -539,7 +546,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         
-        // Создаем кнопки для каждого найденного товара
+        // Create buttons for each found product
         for (int i = 0; i < searchResults.size(); i += 2) {
             List<InlineKeyboardButton> row = new ArrayList<>();
             
@@ -598,6 +605,12 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             sendMainMenu(chatId);
         } else if (callbackData.equals("checkout")) {
             processCheckout(chatId);
+        } else if (callbackData.startsWith("payment_crypto_")) {
+            String orderId = callbackData.substring(15);
+            processPayment(chatId, orderId, PaymentMethodFactory.PaymentType.CRYPTO);
+        } else if (callbackData.startsWith("payment_stars_")) {
+            String orderId = callbackData.substring(14);
+            processPayment(chatId, orderId, PaymentMethodFactory.PaymentType.STARS);
         } else if (callbackData.equals("clear_cart")) {
             clearCart(chatId);
         } else if (callbackData.equals("admin_panel")) {
@@ -641,7 +654,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             return;
         }
         
-        // Рассчитываем общую сумму
+        // Calculate total amount
         double totalAmount = 0;
         for (Map.Entry<String, Integer> entry : cart.getItems().entrySet()) {
             Product product = findProductById(entry.getKey());
@@ -650,16 +663,73 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             }
         }
         
-        // Создаем заказ
+        // Create order
         String orderId = OrderManager.createOrder(chatId, cart.getItems(), totalAmount);
+        pendingOrders.put(chatId, orderId);
         
-        // Проверяем блокчейн транзакцию
-        boolean blockchainSuccess = processBlockchainTransaction(orderId, totalAmount);
+        // Show payment method selection
+        showPaymentMethodSelection(chatId, orderId, totalAmount);
+    }
+    
+    private void showPaymentMethodSelection(long chatId, String orderId, double totalAmount) {
+        String messageText = "✅ Заказ #" + orderId + " создан!\n" +
+                "💰 Сумма: " + String.format("%.2f", totalAmount) + "₽\n\n" +
+                "💳 Выберите способ оплаты:";
         
-        if (blockchainSuccess) {
-            // Успешная транзакция - показываем ссылку на группу
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+        
+        // Cryptocurrency payment button
+        List<InlineKeyboardButton> cryptoRow = new ArrayList<>();
+        InlineKeyboardButton cryptoButton = new InlineKeyboardButton();
+        cryptoButton.setText("₿ Криптовалюта");
+        cryptoButton.setCallbackData("payment_crypto_" + orderId);
+        cryptoRow.add(cryptoButton);
+        keyboard.add(cryptoRow);
+        
+        // Telegram Stars payment button
+        List<InlineKeyboardButton> starsRow = new ArrayList<>();
+        InlineKeyboardButton starsButton = new InlineKeyboardButton();
+        starsButton.setText("⭐ Telegram Stars");
+        starsButton.setCallbackData("payment_stars_" + orderId);
+        starsRow.add(starsButton);
+        keyboard.add(starsRow);
+        
+        markup.setKeyboard(keyboard);
+        
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId);
+        message.setText(messageText);
+        message.setReplyMarkup(markup);
+        
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private void processPayment(long chatId, String orderId, PaymentMethodFactory.PaymentType paymentType) {
+        Order order = OrderManager.getOrder(orderId);
+        if (order == null) {
+            sendMessage(chatId, "❌ Заказ не найден!");
+            return;
+        }
+        
+        double totalAmount = order.getTotalAmount();
+        
+        // Create payment processor with selected method
+        PaymentMethod paymentMethod = PaymentMethodFactory.create(paymentType);
+        PaymentProcessor processor = new PaymentProcessor(paymentMethod);
+        
+        // Process payment
+        PaymentResult result = processor.process(orderId, totalAmount);
+        
+        if (result.isSuccess()) {
+            // Successful payment - show payment link
             String successMessage = "✅ Заказ #" + orderId + " оформлен!\n" +
-                    "💰 Сумма: " + String.format("%.2f", totalAmount) + "₽\n\n" +
+                    "💰 Сумма: " + String.format("%.2f", totalAmount) + "₽\n" +
+                    "💳 Способ оплаты: " + paymentMethod.getEmoji() + " " + paymentMethod.getMethodName() + "\n\n" +
                     "🔗 Перейдите по ссылке для оплаты:";
             
             InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
@@ -684,62 +754,27 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             } catch (TelegramApiException e) {
                 e.printStackTrace();
             }
+            
+            // Clear cart after successful order
+            Cart cart = userCarts.getOrDefault(chatId, new Cart());
+            cart.clear();
+            userCarts.put(chatId, cart);
+            pendingOrders.remove(chatId);
         } else {
-            // Ошибка блокчейна - возврат средств, ссылка не показывается
-            String errorMessage = "❌ Ошибка при обработке транзакции на блокчейне!\n\n" +
+            // Payment error - refund notification, no link shown
+            String errorMessage = "❌ Ошибка при обработке платежа через " + paymentMethod.getMethodName() + "!\n\n" +
                     "💰 Заказ #" + orderId + " отменен.\n" +
                     "💵 Средства будут возвращены автоматически в течение 24 часов.\n\n" +
                     "Попробуйте оформить заказ позже или обратитесь в поддержку.";
             
             sendMessage(chatId, errorMessage);
             
-            // Отменяем заказ
-            Order order = OrderManager.getOrder(orderId);
-            if (order != null) {
-                order.setStatus(Order.OrderStatus.CANCELLED);
-            }
-            
-            // Не очищаем корзину, чтобы пользователь мог попробовать снова
-            return;
+            // Cancel order
+            order.setStatus(Order.OrderStatus.CANCELLED);
+            pendingOrders.remove(chatId);
         }
-        
-        // Очищаем корзину после успешного оформления заказа
-        cart.clear();
-        userCarts.put(chatId, cart);
     }
     
-    /**
-     * Обрабатывает транзакцию на блокчейне
-     * @param orderId ID заказа
-     * @param amount Сумма транзакции
-     * @return true если транзакция успешна, false при ошибке
-     */
-    private boolean processBlockchainTransaction(String orderId, double amount) {
-        try {
-            // Симуляция проверки блокчейна
-            // В реальной реализации здесь будет интеграция с блокчейн API
-            
-            // Имитация случайной ошибки (5% вероятность ошибки для тестирования)
-            // В продакшене это должно быть реальной проверкой блокчейна
-            Random random = new Random();
-            boolean hasError = random.nextInt(100) < 5; // 5% вероятность ошибки
-            
-            if (hasError) {
-                // Симуляция ошибки блокчейна
-                System.out.println("Blockchain error for order: " + orderId);
-                return false;
-            }
-            
-            // Симуляция успешной транзакции
-            System.out.println("Blockchain transaction successful for order: " + orderId + ", amount: " + amount);
-            return true;
-            
-        } catch (Exception e) {
-            // Обработка исключений при работе с блокчейном
-            System.err.println("Blockchain processing error: " + e.getMessage());
-            return false;
-        }
-    }
     
     private void clearCart(long chatId) {
         Cart cart = userCarts.getOrDefault(chatId, new Cart());
@@ -776,7 +811,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     }
     
     private void initializeProducts() {
-        // Инициализируем категории
+        // Initialize categories
         categories.put("🍕 Еда и напитки", new ArrayList<>());
         categories.put("📱 Электроника", new ArrayList<>());
         categories.put("👕 Одежда и обувь", new ArrayList<>());
@@ -784,12 +819,12 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         categories.put("🎮 Развлечения", new ArrayList<>());
         categories.put("💄 Красота и здоровье", new ArrayList<>());
         
-        // Добавляем только наши основные товары
+        // Add only our main products
         addPopularProducts();
     }
     
     public void addPopularProducts() {
-        // Добавляем только основные товары
+        // Add only main products
         
         // 🍕 Еда и напитки
         List<Product> food = categories.get("🍕 Еда и напитки");
@@ -914,7 +949,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
         message.setText(text);
-        // Убираем Markdown парсинг, чтобы избежать ошибок
+        // Remove Markdown parsing to avoid errors
         
         try {
             execute(message);
@@ -986,7 +1021,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         
-        // Кнопка "Назад к поиску"
+        // Back to search button
         List<InlineKeyboardButton> backRow = new ArrayList<>();
         InlineKeyboardButton backButton = new InlineKeyboardButton();
         backButton.setText("⬅️ Назад к поиску");
