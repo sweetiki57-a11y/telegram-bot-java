@@ -1,0 +1,22 @@
+# Пример конфигурационного файла
+# Скопируйте этот файл в src/main/resources/application.properties
+# и замените значения на ваши
+
+# Telegram Bot Configuration
+telegram.bot.username=YOUR_BOT_USERNAME
+telegram.bot.token=YOUR_BOT_TOKEN
+
+# Database Configuration (for future use)
+spring.datasource.url=jdbc:h2:mem:testdb
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=password
+
+# JPA Configuration
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+spring.jpa.hibernate.ddl-auto=create-drop
+spring.jpa.show-sql=true
+
+# Logging
+logging.level.com.example.telegrambot=DEBUG
+logging.level.org.telegram.telegrambots=INFO
