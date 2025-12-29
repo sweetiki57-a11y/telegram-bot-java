@@ -667,7 +667,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             
             List<InlineKeyboardButton> paymentRow = new ArrayList<>();
             InlineKeyboardButton paymentButton = new InlineKeyboardButton();
-            paymentButton.setText("💳 Перейти к оплате");
+            paymentButton.setText("🔗 Перейти к оплате");
             paymentButton.setUrl(PAYMENT_GROUP_LINK);
             paymentRow.add(paymentButton);
             keyboard.add(paymentRow);
@@ -883,7 +883,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
                 "====================\n" +
                 "@MARY_WEED 🥥🍫❄️💊\n" +
                 "====================\n\n" +
-                "👽💰💳\n" +
+                "👽💰\n" +
                 "@BLackCatEx \n" +
                 "@TheMatrixEx \n" +
                 "@CryptuLMDrsrv \n" +

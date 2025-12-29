@@ -74,7 +74,7 @@ public class SendHeaderCommand extends BaseCommand {
                 "====================\n" +
                 "@MARY_WEED 🥥🍫❄️💊💎\n" +
                 "====================\n\n" +
-                " 👽💰💳\n" +
+                " 👽💰\n" +
                 "@BLackCatEx \n" +
                 "@TheMatrixEx \n" +
                 "@CryptuLMDrsrv \n" +
