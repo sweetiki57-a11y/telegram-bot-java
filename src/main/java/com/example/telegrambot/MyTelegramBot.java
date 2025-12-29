@@ -66,7 +66,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
                 if (messageText.length() > 1 && !messageText.startsWith("/")) {
                     searchProducts(chatId, messageText);
                 } else {
-                    sendMessage(chatId, "Используйте кнопки меню или напишите название товара для поиска");
+                    sendMessage(chatId, "Use menu buttons or type product name to search");
                 }
             }
         } else if (update.hasCallbackQuery()) {
@@ -78,13 +78,13 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     }
     
     private void sendWelcomeMessage(long chatId) {
-        String welcomeText = "🎉 *Добро пожаловать в Fredo Store!*\n\n" +
-                "🛍️ *Ваш интернет-магазин*\n\n" +
-                "🛒 *Как заказать:*\n" +
-                "1️⃣ Выберите товар\n" +
-                "2️⃣ Добавьте в корзину\n" +
-                "3️⃣ Оформите заказ\n\n" +
-                "Используйте кнопки внизу! 🛍️";
+        String welcomeText = "🎉 *Welcome to Fredo Store!*\n\n" +
+                "🛍️ *Your Online Store*\n\n" +
+                "🛒 *How to Order:*\n" +
+                "1️⃣ Choose a product\n" +
+                "2️⃣ Add to cart\n" +
+                "3️⃣ Checkout\n\n" +
+                "Use the buttons below! 🛍️";
         
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
@@ -108,14 +108,14 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         }
         
         if (allProducts.isEmpty()) {
-            sendMessage(chatId, "В магазине пока нет товаров.");
+            sendMessage(chatId, "No products available in the store yet.");
             return;
         }
         
         // Create beautiful showcase of all products
         StringBuilder showcaseText = new StringBuilder();
-        showcaseText.append("🛍️ *Fredo Store - Все товары*\n\n");
-        showcaseText.append("Выберите товар для добавления в корзину:\n\n");
+        showcaseText.append("🛍️ *Fredo Store - All Products*\n\n");
+        showcaseText.append("Choose a product to add to cart:\n\n");
         
         // Group products by 2 per row for beautiful display
         for (int i = 0; i < allProducts.size(); i += 2) {
@@ -158,7 +158,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         // Add cart button
         List<InlineKeyboardButton> bottomRow = new ArrayList<>();
         InlineKeyboardButton cartButton = new InlineKeyboardButton();
-        cartButton.setText("🛒 Корзина");
+        cartButton.setText("🛒 Cart");
         cartButton.setCallbackData("cart");
         bottomRow.add(cartButton);
         keyboard.add(bottomRow);
@@ -226,16 +226,16 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     private void sendProductDetails(long chatId, String productId) {
         Product product = findProductById(productId);
         if (product == null) {
-            sendMessage(chatId, "Товар не найден.");
+            sendMessage(chatId, "Product not found.");
             return;
         }
         
         String productText = "🛍️ *" + product.getName() + "*\n\n" +
-                getProductEmoji(product.getName()) + " *Описание:* " + product.getDescription() + "\n\n" +
-                "💰 *Цена:* " + (int)product.getPrice() + "₽\n" +
-                "📦 *В наличии:* " + product.getStock() + " шт.\n" +
-                "🏷️ *Категория:* " + product.getCategory() + "\n\n" +
-                "✨ *Хотите добавить в корзину?*";
+                getProductEmoji(product.getName()) + " *Description:* " + product.getDescription() + "\n\n" +
+                "💰 *Price:* " + (int)product.getPrice() + "₽\n" +
+                "📦 *In Stock:* " + product.getStock() + " pcs.\n" +
+                "🏷️ *Category:* " + product.getCategory() + "\n\n" +
+                "✨ *Want to add to cart?*";
         
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
@@ -243,7 +243,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         // Buttons for adding to cart
         List<InlineKeyboardButton> addRow = new ArrayList<>();
         InlineKeyboardButton addButton = new InlineKeyboardButton();
-        addButton.setText("🛒 Добавить в корзину");
+        addButton.setText("🛒 Add to Cart");
         addButton.setCallbackData("add_to_cart_" + productId);
         addRow.add(addButton);
         keyboard.add(addRow);
@@ -251,7 +251,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         // Back button
         List<InlineKeyboardButton> backRow = new ArrayList<>();
         InlineKeyboardButton backButton = new InlineKeyboardButton();
-        backButton.setText("⬅️ Назад к товарам");
+        backButton.setText("⬅️ Back to Products");
         backButton.setCallbackData("back_to_main_menu");
         backRow.add(backButton);
         keyboard.add(backRow);
@@ -275,16 +275,16 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         Cart cart = userCarts.getOrDefault(chatId, new Cart());
         
         if (cart.getItems().isEmpty()) {
-            String emptyCartText = "🛒 *Ваша корзина пуста*\n\n" +
-                    "✨ Добавьте товары из каталога, чтобы оформить заказ!\n\n" +
-                    "Нажмите кнопку ниже для выбора товаров:";
+            String emptyCartText = "🛒 *Your cart is empty*\n\n" +
+                    "✨ Add products from catalog to place an order!\n\n" +
+                    "Click the button below to browse products:";
             
             InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
             List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
             
             List<InlineKeyboardButton> shopRow = new ArrayList<>();
             InlineKeyboardButton shopButton = new InlineKeyboardButton();
-            shopButton.setText("🛍️ Перейти к товарам");
+            shopButton.setText("🛍️ Browse Products");
             shopButton.setCallbackData("back_to_main_menu");
             shopRow.add(shopButton);
             keyboard.add(shopRow);
@@ -305,7 +305,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             return;
         }
         
-        StringBuilder cartText = new StringBuilder("🛒 *Ваша корзина*\n\n");
+        StringBuilder cartText = new StringBuilder("🛒 *Your Cart*\n\n");
         double total = 0;
         int itemCount = 0;
         
@@ -318,14 +318,14 @@ public class MyTelegramBot extends TelegramLongPollingBot {
                 
                 cartText.append(getProductEmoji(product.getName()))
                         .append(" *").append(product.getName()).append("*\n")
-                        .append("   Количество: ").append(entry.getValue()).append(" шт.\n")
-                        .append("   Цена: ").append(String.format("%.0f", itemTotal)).append("₽\n\n");
+                        .append("   Quantity: ").append(entry.getValue()).append(" pcs.\n")
+                        .append("   Price: ").append(String.format("%.0f", itemTotal)).append("₽\n\n");
             }
         }
         
-        cartText.append("📊 *Итого товаров:* ").append(itemCount).append(" шт.\n")
-                .append("💰 *Общая сумма:* ").append(String.format("%.0f", total)).append("₽\n\n")
-                .append("✨ *Готовы оформить заказ?*");
+        cartText.append("📊 *Total Items:* ").append(itemCount).append(" pcs.\n")
+                .append("💰 *Total Amount:* ").append(String.format("%.0f", total)).append("₽\n\n")
+                .append("✨ *Ready to checkout?*");
         
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
@@ -333,7 +333,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         // Checkout button
         List<InlineKeyboardButton> orderRow = new ArrayList<>();
         InlineKeyboardButton orderButton = new InlineKeyboardButton();
-        orderButton.setText("✅ Оформить заказ");
+        orderButton.setText("✅ Checkout");
         orderButton.setCallbackData("checkout");
         orderRow.add(orderButton);
         keyboard.add(orderRow);
@@ -341,12 +341,12 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         // Cart management buttons
         List<InlineKeyboardButton> manageRow = new ArrayList<>();
         InlineKeyboardButton clearButton = new InlineKeyboardButton();
-        clearButton.setText("🗑️ Очистить корзину");
+        clearButton.setText("🗑️ Clear Cart");
         clearButton.setCallbackData("clear_cart");
         manageRow.add(clearButton);
         
         InlineKeyboardButton continueButton = new InlineKeyboardButton();
-        continueButton.setText("🛍️ Продолжить покупки");
+        continueButton.setText("🛍️ Continue Shopping");
         continueButton.setCallbackData("back_to_main_menu");
         manageRow.add(continueButton);
         keyboard.add(manageRow);
@@ -370,11 +370,11 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         List<Order> orders = OrderManager.getUserOrders(chatId);
         
         if (orders.isEmpty()) {
-            sendMessage(chatId, "📋 Ваши заказы:\n\nПока заказов нет. Оформите первый заказ через корзину!");
+            sendMessage(chatId, "📋 Your Orders:\n\nNo orders yet. Place your first order through the cart!");
             return;
         }
         
-        StringBuilder ordersText = new StringBuilder("📋 Ваши заказы:\n\n");
+        StringBuilder ordersText = new StringBuilder("📋 Your Orders:\n\n");
         
         // Create product map for formatting
         Map<String, Product> productsMap = new HashMap<>();
@@ -394,7 +394,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         // Back to menu button
         List<InlineKeyboardButton> backRow = new ArrayList<>();
         InlineKeyboardButton backButton = new InlineKeyboardButton();
-        backButton.setText("⬅️ Назад в меню");
+        backButton.setText("⬅️ Back to Menu");
         backButton.setCallbackData("back_to_main_menu");
         backRow.add(backButton);
         keyboard.add(backRow);
@@ -414,33 +414,33 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     }
     
     private void sendHelp(long chatId) {
-        String helpText = "❓ *Помощь по использованию бота:*\n\n" +
-                "🛍️ *Основные команды:*\n" +
-                "/start - Начать работу с ботом\n" +
-                "/menu - Открыть каталог товаров\n" +
-                "/cart - Просмотреть корзину\n" +
-                "/orders - Просмотреть заказы\n" +
-                "/help - Показать эту справку\n\n" +
-                "🔍 *Поиск товаров:*\n" +
-                "Используйте кнопку 'Поиск товаров' для быстрого поиска по названию или описанию\n\n" +
-                "🛒 *Как заказать:*\n" +
-                "1. Просмотрите каталог товаров\n" +
-                "2. Добавьте товары в корзину\n" +
-                "3. Оформите заказ\n\n" +
-                "📞 *Поддержка:* 24/7";
+        String helpText = "❓ *Bot Help Guide:*\n\n" +
+                "🛍️ *Main Commands:*\n" +
+                "/start - Start using the bot\n" +
+                "/menu - Open product catalog\n" +
+                "/cart - View shopping cart\n" +
+                "/orders - View your orders\n" +
+                "/help - Show this help\n\n" +
+                "🔍 *Product Search:*\n" +
+                "Use the 'Search Products' button for quick search by name or description\n\n" +
+                "🛒 *How to Order:*\n" +
+                "1. Browse the product catalog\n" +
+                "2. Add products to cart\n" +
+                "3. Checkout\n\n" +
+                "📞 *Support:* 24/7";
         
         if (AdminPanel.isAdmin(chatId)) {
-            helpText += "\n\n🔧 *Админ-команды:*\n/admin - Админ-панель";
+            helpText += "\n\n🔧 *Admin Commands:*\n/admin - Admin Panel";
         }
         
-        helpText += "\n\nДля навигации используйте кнопки в меню.";
+        helpText += "\n\nUse menu buttons for navigation.";
         
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         
         List<InlineKeyboardButton> backRow = new ArrayList<>();
         InlineKeyboardButton backButton = new InlineKeyboardButton();
-        backButton.setText("⬅️ Назад в меню");
+        backButton.setText("⬅️ Back to Menu");
         backButton.setCallbackData("back_to_main_menu");
         backRow.add(backButton);
         keyboard.add(backRow);
@@ -461,7 +461,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     }
     
     private void sendSearchPrompt(long chatId) {
-        String text = "Выберите категорию по которой будет производиться поиск:";
+        String text = "Select a category to search:";
         
         InlineKeyboardMarkup markup = KeyboardFactory.createSearchCategoriesKeyboard();
         
@@ -493,19 +493,19 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         }
         
         if (searchResults.isEmpty()) {
-            String noResultsText = "🔍 *Результаты поиска*\n\n" +
-                    "❌ По запросу \"" + query + "\" ничего не найдено.\n\n" +
-                    "💡 *Попробуйте:*\n" +
-                    "• Изменить поисковый запрос\n" +
-                    "• Использовать более общие слова\n" +
-                    "• Проверить правописание";
+            String noResultsText = "🔍 *Search Results*\n\n" +
+                    "❌ No results found for \"" + query + "\".\n\n" +
+                    "💡 *Try:*\n" +
+                    "• Change your search query\n" +
+                    "• Use more general words\n" +
+                    "• Check spelling";
             
             InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
             List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
             
             List<InlineKeyboardButton> backRow = new ArrayList<>();
             InlineKeyboardButton backButton = new InlineKeyboardButton();
-            backButton.setText("⬅️ Назад в меню");
+            backButton.setText("⬅️ Back to Menu");
             backButton.setCallbackData("back_to_main_menu");
             backRow.add(backButton);
             keyboard.add(backRow);
@@ -528,8 +528,8 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         
         // Show search results
         StringBuilder searchText = new StringBuilder();
-        searchText.append("🔍 *Результаты поиска по запросу: \"").append(query).append("\"*\n\n");
-        searchText.append("Найдено товаров: ").append(searchResults.size()).append("\n\n");
+        searchText.append("🔍 *Search Results for: \"").append(query).append("\"*\n\n");
+        searchText.append("Found products: ").append(searchResults.size()).append("\n\n");
         
         // Group results by 2 per row
         for (int i = 0; i < searchResults.size(); i += 2) {
@@ -567,10 +567,10 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             keyboard.add(row);
         }
         
-        // Кнопка "Назад"
+        // Back button
         List<InlineKeyboardButton> backRow = new ArrayList<>();
         InlineKeyboardButton backButton = new InlineKeyboardButton();
-        backButton.setText("⬅️ Назад в меню");
+        backButton.setText("⬅️ Back to Menu");
         backButton.setCallbackData("back_to_main_menu");
         backRow.add(backButton);
         keyboard.add(backRow);
@@ -636,7 +636,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     private void addToCart(long chatId, String productId) {
         Product product = findProductById(productId);
         if (product == null) {
-            sendMessage(chatId, "Товар не найден.");
+            sendMessage(chatId, "Product not found.");
             return;
         }
         
@@ -644,13 +644,13 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         cart.addItem(productId, 1);
         userCarts.put(chatId, cart);
         
-        sendMessage(chatId, "✅ " + product.getName() + " добавлен в корзину!");
+        sendMessage(chatId, "✅ " + product.getName() + " added to cart!");
     }
     
     private void processCheckout(long chatId) {
         Cart cart = userCarts.getOrDefault(chatId, new Cart());
         if (cart.getItems().isEmpty()) {
-            sendMessage(chatId, "Корзина пуста!");
+            sendMessage(chatId, "Cart is empty!");
             return;
         }
         
@@ -672,9 +672,9 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     }
     
     private void showPaymentMethodSelection(long chatId, String orderId, double totalAmount) {
-        String messageText = "✅ Заказ #" + orderId + " создан!\n" +
-                "💰 Сумма: " + String.format("%.2f", totalAmount) + "₽\n\n" +
-                "💳 Выберите способ оплаты:";
+        String messageText = "✅ Order #" + orderId + " created!\n" +
+                "💰 Amount: " + String.format("%.2f", totalAmount) + "₽\n\n" +
+                "💳 Select payment method:";
         
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
@@ -682,7 +682,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         // Cryptocurrency payment button
         List<InlineKeyboardButton> cryptoRow = new ArrayList<>();
         InlineKeyboardButton cryptoButton = new InlineKeyboardButton();
-        cryptoButton.setText("₿ Криптовалюта");
+        cryptoButton.setText("₿ Cryptocurrency");
         cryptoButton.setCallbackData("payment_crypto_" + orderId);
         cryptoRow.add(cryptoButton);
         keyboard.add(cryptoRow);
@@ -712,7 +712,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     private void processPayment(long chatId, String orderId, PaymentMethodFactory.PaymentType paymentType) {
         Order order = OrderManager.getOrder(orderId);
         if (order == null) {
-            sendMessage(chatId, "❌ Заказ не найден!");
+            sendMessage(chatId, "❌ Order not found!");
             return;
         }
         
@@ -727,17 +727,17 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         
         if (result.isSuccess()) {
             // Successful payment - show payment link
-            String successMessage = "✅ Заказ #" + orderId + " оформлен!\n" +
-                    "💰 Сумма: " + String.format("%.2f", totalAmount) + "₽\n" +
-                    "💳 Способ оплаты: " + paymentMethod.getEmoji() + " " + paymentMethod.getMethodName() + "\n\n" +
-                    "🔗 Перейдите по ссылке для оплаты:";
+            String successMessage = "✅ Order #" + orderId + " created!\n" +
+                    "💰 Amount: " + String.format("%.2f", totalAmount) + "₽\n" +
+                    "💳 Payment Method: " + paymentMethod.getEmoji() + " " + paymentMethod.getMethodName() + "\n\n" +
+                    "🔗 Follow the link to complete payment:";
             
             InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
             List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
             
             List<InlineKeyboardButton> paymentRow = new ArrayList<>();
             InlineKeyboardButton paymentButton = new InlineKeyboardButton();
-            paymentButton.setText("🔗 Перейти к оплате");
+            paymentButton.setText("🔗 Go to Payment");
             paymentButton.setUrl(PAYMENT_GROUP_LINK);
             paymentRow.add(paymentButton);
             keyboard.add(paymentRow);
@@ -762,10 +762,10 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             pendingOrders.remove(chatId);
         } else {
             // Payment error - refund notification, no link shown
-            String errorMessage = "❌ Ошибка при обработке платежа через " + paymentMethod.getMethodName() + "!\n\n" +
-                    "💰 Заказ #" + orderId + " отменен.\n" +
-                    "💵 Средства будут возвращены автоматически в течение 24 часов.\n\n" +
-                    "Попробуйте оформить заказ позже или обратитесь в поддержку.";
+            String errorMessage = "❌ Payment processing error via " + paymentMethod.getMethodName() + "!\n\n" +
+                    "💰 Order #" + orderId + " cancelled.\n" +
+                    "💵 Funds will be automatically refunded within 24 hours.\n\n" +
+                    "Please try again later or contact support.";
             
             sendMessage(chatId, errorMessage);
             
@@ -780,7 +780,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         Cart cart = userCarts.getOrDefault(chatId, new Cart());
         cart.clear();
         userCarts.put(chatId, cart);
-        sendMessage(chatId, "🗑️ Корзина очищена.");
+        sendMessage(chatId, "🗑️ Cart cleared.");
     }
     
     private Product findProductById(String productId) {
@@ -964,58 +964,58 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         
         switch (category) {
             case "гаш":
-                categoryName = "Гаш/Шиш 🍫🥦";
-                text = "🔍 *Поиск по категории: " + categoryName + "*\n\n" +
-                       "Найдены товары в категории Гаш/Шиш:\n\n" +
-                       "🍫 **Гашиш премиум** - 2,500₽\n" +
-                       "🥦 **Шишки А+** - 1,800₽\n" +
-                       "🍫 **Гаш голландский** - 3,000₽\n" +
-                       "🥦 **Шишки индика** - 2,200₽\n\n" +
-                       "Выберите товар для добавления в корзину!";
+                categoryName = "Hash/Bud 🍫🥦";
+                text = "🔍 *Search by Category: " + categoryName + "*\n\n" +
+                       "Found products in Hash/Bud category:\n\n" +
+                       "🍫 **Premium Hash** - 2,500₽\n" +
+                       "🥦 **A+ Buds** - 1,800₽\n" +
+                       "🍫 **Dutch Hash** - 3,000₽\n" +
+                       "🥦 **Indica Buds** - 2,200₽\n\n" +
+                       "Select a product to add to cart!";
                 break;
             case "cox":
                 categoryName = "Cox 🥥";
-                text = "🔍 *Поиск по категории: " + categoryName + "*\n\n" +
-                       "Найдены товары в категории Cox:\n\n" +
-                       "🥥 **Cox белый** - 1,200₽\n" +
-                       "🥥 **Cox перуанский** - 1,500₽\n" +
-                       "🥥 **Cox колумбийский** - 1,800₽\n\n" +
-                       "Выберите товар для добавления в корзину!";
+                text = "🔍 *Search by Category: " + categoryName + "*\n\n" +
+                       "Found products in Cox category:\n\n" +
+                       "🥥 **White Cox** - 1,200₽\n" +
+                       "🥥 **Peruvian Cox** - 1,500₽\n" +
+                       "🥥 **Colombian Cox** - 1,800₽\n\n" +
+                       "Select a product to add to cart!";
                 break;
             case "lsd":
                 categoryName = "LSD 🍭🍄";
-                text = "🔍 *Поиск по категории: " + categoryName + "*\n\n" +
-                       "Найдены товары в категории LSD:\n\n" +
+                text = "🔍 *Search by Category: " + categoryName + "*\n\n" +
+                       "Found products in LSD category:\n\n" +
                        "🍭 **LSD-25** - 800₽\n" +
-                       "🍄 **Грибы псилоцибин** - 1,000₽\n" +
+                       "🍄 **Psilocybin Mushrooms** - 1,000₽\n" +
                        "🍭 **LSD-100** - 1,200₽\n" +
-                       "🍄 **Грибы золотые** - 1,500₽\n\n" +
-                       "Выберите товар для добавления в корзину!";
+                       "🍄 **Golden Mushrooms** - 1,500₽\n\n" +
+                       "Select a product to add to cart!";
                 break;
             case "ice":
                 categoryName = "❄️⚡";
-                text = "🔍 *Поиск по категории: " + categoryName + "*\n\n" +
-                       "Найдены товары в категории Лед:\n\n" +
-                       "❄️ **Лед кристалл** - 2,000₽\n" +
-                       "⚡ **Скорость** - 1,500₽\n" +
-                       "❄️ **Лед голубой** - 2,500₽\n\n" +
-                       "Выберите товар для добавления в корзину!";
+                text = "🔍 *Search by Category: " + categoryName + "*\n\n" +
+                       "Found products in Ice category:\n\n" +
+                       "❄️ **Crystal Ice** - 2,000₽\n" +
+                       "⚡ **Speed** - 1,500₽\n" +
+                       "❄️ **Blue Ice** - 2,500₽\n\n" +
+                       "Select a product to add to cart!";
                 break;
             case "pills":
                 categoryName = "💊💎";
-                text = "🔍 *Поиск по категории: " + categoryName + "*\n\n" +
-                       "Найдены товары в категории Таблетки:\n\n" +
-                       "💊 **Экстази** - 800₽\n" +
-                       "💎 **МДМА** - 1,200₽\n" +
-                       "💊 **Амфетамин** - 1,000₽\n" +
-                       "💎 **Кристалл** - 1,800₽\n\n" +
-                       "Выберите товар для добавления в корзину!";
+                text = "🔍 *Search by Category: " + categoryName + "*\n\n" +
+                       "Found products in Pills category:\n\n" +
+                       "💊 **Ecstasy** - 800₽\n" +
+                       "💎 **MDMA** - 1,200₽\n" +
+                       "💊 **Amphetamine** - 1,000₽\n" +
+                       "💎 **Crystal** - 1,800₽\n\n" +
+                       "Select a product to add to cart!";
                 break;
             case "empty":
-                text = "❌ Эта кнопка пока не активна";
+                text = "❌ This button is not active yet";
                 break;
             default:
-                text = "❌ Категория не найдена";
+                text = "❌ Category not found";
         }
         
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
@@ -1024,7 +1024,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         // Back to search button
         List<InlineKeyboardButton> backRow = new ArrayList<>();
         InlineKeyboardButton backButton = new InlineKeyboardButton();
-        backButton.setText("⬅️ Назад к поиску");
+        backButton.setText("⬅️ Back to Search");
         backButton.setCallbackData("back_to_search");
         backRow.add(backButton);
         keyboard.add(backRow);

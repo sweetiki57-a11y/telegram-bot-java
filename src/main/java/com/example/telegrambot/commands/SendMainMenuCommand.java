@@ -5,7 +5,7 @@ import com.example.telegrambot.factory.KeyboardFactory;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
 /**
- * Команда для отправки главного меню
+ * Command for sending main menu
  */
 public class SendMainMenuCommand extends BaseCommand {
     
@@ -15,10 +15,10 @@ public class SendMainMenuCommand extends BaseCommand {
     
     @Override
     public void execute(long chatId) {
-        String text = "🏠 *Главное меню*\n\n" +
-                "Выберите нужный раздел:";
+        String text = "🏠 *Main Menu*\n\n" +
+                "Select a section:";
         
-        // Создаем inline клавиатуру
+        // Create inline keyboard
         InlineKeyboardMarkup markup = KeyboardFactory.createMainMenuKeyboard();
         
         sendMessageWithKeyboard(chatId, text, markup);
@@ -26,6 +26,6 @@ public class SendMainMenuCommand extends BaseCommand {
     
     @Override
     public String getDescription() {
-        return "Показать главное меню";
+        return "Show main menu";
     }
 }

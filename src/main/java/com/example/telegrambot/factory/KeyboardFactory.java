@@ -17,7 +17,7 @@ import java.util.Random;
 public class KeyboardFactory {
     
     /**
-     * Создает главную Reply клавиатуру
+     * Creates main Reply keyboard
      */
     public static ReplyKeyboardMarkup createMainKeyboard() {
         ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
@@ -26,22 +26,22 @@ public class KeyboardFactory {
         
         List<KeyboardRow> keyboardRows = new ArrayList<>();
         
-        // Первый ряд
+        // First row
         KeyboardRow row1 = new KeyboardRow();
-        row1.add("🛒 Шопы");
-        row1.add("💰 Обменники");
+        row1.add("🛒 Shops");
+        row1.add("💰 Exchangers");
         keyboardRows.add(row1);
         
-        // Второй ряд
+        // Second row
         KeyboardRow row2 = new KeyboardRow();
-        row2.add("🔍 Поиск по категориям");
-        row2.add("📄 Шапка");
+        row2.add("🔍 Category Search");
+        row2.add("📄 Header");
         keyboardRows.add(row2);
         
-        // Третий ряд
+        // Third row
         KeyboardRow row3 = new KeyboardRow();
-        row3.add("🏆 Топ");
-        row3.add("📋 Меню");
+        row3.add("🏆 Top");
+        row3.add("📋 Menu");
         keyboardRows.add(row3);
         
         keyboard.setKeyboard(keyboardRows);
@@ -49,25 +49,25 @@ public class KeyboardFactory {
     }
     
     /**
-     * Создает inline клавиатуру для главного меню
+     * Creates inline keyboard for main menu
      */
     public static InlineKeyboardMarkup createMainMenuKeyboard() {
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         
-        // Создаем кнопки
+        // Create buttons
         List<InlineKeyboardButton> row1 = new ArrayList<>();
-        row1.add(createCallbackButton("🛒 Шопы", "main_shops"));
-        row1.add(createCallbackButton("💰 Обменники", "main_exchangers"));
+        row1.add(createCallbackButton("🛒 Shops", "main_shops"));
+        row1.add(createCallbackButton("💰 Exchangers", "main_exchangers"));
         keyboard.add(row1);
         
         List<InlineKeyboardButton> row2 = new ArrayList<>();
-        row2.add(createCallbackButton("🔍 Поиск по категориям", "main_search"));
-        row2.add(createCallbackButton("📄 Шапка", "main_header"));
+        row2.add(createCallbackButton("🔍 Category Search", "main_search"));
+        row2.add(createCallbackButton("📄 Header", "main_header"));
         keyboard.add(row2);
         
         List<InlineKeyboardButton> row3 = new ArrayList<>();
-        row3.add(createCallbackButton("🏆 Топ", "main_top"));
+        row3.add(createCallbackButton("🏆 Top", "main_top"));
         keyboard.add(row3);
         
         markup.setKeyboard(keyboard);
@@ -75,13 +75,13 @@ public class KeyboardFactory {
     }
     
     /**
-     * Создает inline клавиатуру для шопов
+     * Creates inline keyboard for shops
      */
     public static InlineKeyboardMarkup createShopsKeyboard() {
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         
-        // Создаем кнопки для каждого магазина
+        // Create buttons for each store
         List<InlineKeyboardButton> row1 = new ArrayList<>();
         row1.add(createUrlButton("Marshmello", "https://t.me/Marshmello"));
         row1.add(createUrlButton("ZoroMD", "https://t.me/ZoroMD"));
@@ -116,13 +116,13 @@ public class KeyboardFactory {
     }
     
     /**
-     * Создает inline клавиатуру для обменников
+     * Creates inline keyboard for exchangers
      */
     public static InlineKeyboardMarkup createExchangersKeyboard() {
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         
-        // Список обменников
+        // List of exchangers
         String[] exchangers = {
             "BLackCatEx", "TheMatrixEx", "CryptuLMDrsrv", "CandyEXC",
             "FRN_Crypto1", "Monkeys_Crypto1", "BTCBOSSMD", "BLACKROCKEX",
@@ -132,17 +132,17 @@ public class KeyboardFactory {
             "ACHiLLES_LTC", "MIKE_LTC2", "LesbeaEX"
         };
         
-        // Создаем кнопки по 2 в ряд
+        // Create buttons 2 per row
         for (int i = 0; i < exchangers.length; i += 2) {
             List<InlineKeyboardButton> row = new ArrayList<>();
             
-            // Первая кнопка в ряду
+            // First button in row
             InlineKeyboardButton button1 = new InlineKeyboardButton();
             button1.setText("💱 " + exchangers[i]);
             button1.setUrl("https://t.me/" + exchangers[i]);
             row.add(button1);
             
-            // Вторая кнопка в ряду (если есть)
+            // Second button in row (if exists)
             if (i + 1 < exchangers.length) {
                 InlineKeyboardButton button2 = new InlineKeyboardButton();
                 button2.setText("💱 " + exchangers[i + 1]);
@@ -158,13 +158,13 @@ public class KeyboardFactory {
     }
     
     /**
-     * Создает inline клавиатуру для поиска по категориям
+     * Creates inline keyboard for category search
      */
     public static InlineKeyboardMarkup createSearchCategoriesKeyboard() {
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         
-        // Создаем кнопки для категорий
+        // Create buttons for categories
         List<InlineKeyboardButton> row1 = new ArrayList<>();
         row1.add(createCallbackButton("Гаш/Шиш 🍫🥦", "search_category_гаш"));
         row1.add(createCallbackButton("Cox 🥥", "search_category_cox"));
@@ -185,20 +185,20 @@ public class KeyboardFactory {
     }
     
     /**
-     * Создает inline клавиатуру для топа шопов (случайные 5)
+     * Creates inline keyboard for top shops (random 5)
      */
     public static InlineKeyboardMarkup createTopShopsKeyboard() {
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         
-        // Список всех шопов
+        // List of all shops
         String[] allShops = {
             "Marshmello", "ZoroMD", "Putin", "BILL",
             "FreshDirect", "AlbanianStore", "AURORA", "NASA",
             "MONACO", "Bellucci", "MaraSalvatrucha"
         };
         
-        // Выбираем 5 случайных шопов
+        // Select 5 random shops
         List<String> topShops = new ArrayList<>();
         Random random = new Random();
         List<String> availableShops = new ArrayList<>(Arrays.asList(allShops));
@@ -208,7 +208,7 @@ public class KeyboardFactory {
             topShops.add(availableShops.remove(randomIndex));
         }
         
-        // Создаем кнопки для топ-5 шопов
+        // Create buttons for top-5 shops
         for (int i = 0; i < topShops.size(); i++) {
             String shop = topShops.get(i);
             String emoji = "";
@@ -233,21 +233,21 @@ public class KeyboardFactory {
     }
     
     /**
-     * Создает inline клавиатуру для каналов по категории
+     * Creates inline keyboard for channels by category
      */
     public static InlineKeyboardMarkup createChannelsKeyboard(List<String> channels) {
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         
-        // Создаем кнопки для каждого канала
+        // Create buttons for each channel
         for (String channel : channels) {
-            // Извлекаем имя канала (до первого пробела или @)
+            // Extract channel name (until first space or @)
             String channelName = channel.split("\\s+")[0];
             if (channelName.startsWith("@")) {
-                channelName = channelName.substring(1); // убираем @
+                channelName = channelName.substring(1); // remove @
             }
             
-            // Создаем кнопку-ссылку
+            // Create link button
             List<InlineKeyboardButton> row = new ArrayList<>();
             InlineKeyboardButton button = new InlineKeyboardButton();
             button.setText("🛒 " + channelName);
@@ -256,10 +256,10 @@ public class KeyboardFactory {
             keyboard.add(row);
         }
         
-        // Кнопка "Назад к поиску по категориям"
+        // Back to category search button
         List<InlineKeyboardButton> backRow = new ArrayList<>();
         InlineKeyboardButton backButton = new InlineKeyboardButton();
-        backButton.setText("⬅️ Назад к категориям");
+        backButton.setText("⬅️ Back to Categories");
         backButton.setCallbackData("back_to_search");
         backRow.add(backButton);
         keyboard.add(backRow);
@@ -269,7 +269,7 @@ public class KeyboardFactory {
     }
     
     /**
-     * Создает кнопку с URL
+     * Creates button with URL
      */
     private static InlineKeyboardButton createUrlButton(String text, String url) {
         InlineKeyboardButton button = new InlineKeyboardButton();
@@ -279,7 +279,7 @@ public class KeyboardFactory {
     }
     
     /**
-     * Создает кнопку с callback data
+     * Creates button with callback data
      */
     private static InlineKeyboardButton createCallbackButton(String text, String callbackData) {
         InlineKeyboardButton button = new InlineKeyboardButton();

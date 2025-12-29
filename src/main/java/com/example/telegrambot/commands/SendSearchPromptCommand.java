@@ -5,7 +5,7 @@ import com.example.telegrambot.factory.KeyboardFactory;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
 /**
- * Команда для отправки запроса на поиск по категориям
+ * Command for sending category search prompt
  */
 public class SendSearchPromptCommand extends BaseCommand {
     
@@ -15,9 +15,9 @@ public class SendSearchPromptCommand extends BaseCommand {
     
     @Override
     public void execute(long chatId) {
-        String text = "🔍 Выберите категорию по которой будет производиться поиск:";
+        String text = "🔍 Select a category to search:";
         
-        // Создаем inline клавиатуру с категориями
+        // Create inline keyboard with categories
         InlineKeyboardMarkup markup = KeyboardFactory.createSearchCategoriesKeyboard();
         
         sendMessageWithKeyboard(chatId, text, markup);
@@ -25,7 +25,7 @@ public class SendSearchPromptCommand extends BaseCommand {
     
     @Override
     public String getDescription() {
-        return "Поиск товаров по категориям";
+        return "Search products by categories";
     }
 }
 

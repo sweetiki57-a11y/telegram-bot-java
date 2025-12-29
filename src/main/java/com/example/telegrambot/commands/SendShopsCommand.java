@@ -5,7 +5,7 @@ import com.example.telegrambot.factory.KeyboardFactory;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
 /**
- * Команда для отправки списка шопов
+ * Command for sending shops list
  */
 public class SendShopsCommand extends BaseCommand {
     
@@ -15,9 +15,9 @@ public class SendShopsCommand extends BaseCommand {
     
     @Override
     public void execute(long chatId) {
-        String text = "🛒 Вот список наших надежных магазинов, где вы можете делать покупки без забот!";
+        String text = "🛒 Here is a list of our trusted stores where you can shop with confidence!";
         
-        // Создаем inline клавиатуру с кнопками-ссылками
+        // Create inline keyboard with link buttons
         InlineKeyboardMarkup markup = KeyboardFactory.createShopsKeyboard();
         
         sendMessageWithKeyboard(chatId, text, markup);
@@ -25,6 +25,6 @@ public class SendShopsCommand extends BaseCommand {
     
     @Override
     public String getDescription() {
-        return "Показать список всех шопов";
+        return "Show list of all shops";
     }
 }

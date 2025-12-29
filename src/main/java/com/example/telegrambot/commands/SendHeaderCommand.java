@@ -3,7 +3,7 @@ package com.example.telegrambot.commands;
 import com.example.telegrambot.MyTelegramBot;
 
 /**
- * Команда для отправки шапки
+ * Command for sending header
  */
 public class SendHeaderCommand extends BaseCommand {
     
@@ -14,7 +14,7 @@ public class SendHeaderCommand extends BaseCommand {
     @Override
     public void execute(long chatId) {
         String text = "👽\n\n" +
-                "https://f1.tf/Inoplaneteane сайт 👽\n\n" +
+                "https://f1.tf/Inoplaneteane website 👽\n\n" +
                 "@BLSH7 @BLSH7Bot 🍫☘❄️🥥🔮🍭💎\n" +
                 "====================\n" +
                 "@Fredo_MarketMD \n" +
@@ -98,14 +98,14 @@ public class SendHeaderCommand extends BaseCommand {
                 "@ACHiLLES_LTC\n" +
                 "@MIKE_LTC2\n" +
                 "@LesbeaEX\n\n" +
-                "@d3s1gngun 👨‍🎤👽 - дизайн \n\n" +
-                "https://f1.tf/Inoplaneteane сайт 👽";
+                "@d3s1gngun 👨‍🎤👽 - design \n\n" +
+                "https://f1.tf/Inoplaneteane website 👽";
         
         sendMessage(chatId, text);
     }
     
     @Override
     public String getDescription() {
-        return "Показать шапку с каналами и обменниками";
+        return "Show header with channels and exchangers";
     }
 }

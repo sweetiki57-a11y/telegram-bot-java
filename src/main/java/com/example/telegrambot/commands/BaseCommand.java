@@ -5,8 +5,8 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 /**
- * Базовый класс для всех команд
- * Содержит общие методы для работы с ботом
+ * Base class for all commands
+ * Contains common methods for working with the bot
  */
 public abstract class BaseCommand implements Command {
     protected final MyTelegramBot bot;
@@ -16,9 +16,9 @@ public abstract class BaseCommand implements Command {
     }
     
     /**
-     * Отправляет сообщение в чат
-     * @param chatId ID чата
-     * @param text текст сообщения
+     * Sends message to chat
+     * @param chatId chat ID
+     * @param text message text
      */
     protected void sendMessage(long chatId, String text) {
         try {
@@ -29,10 +29,10 @@ public abstract class BaseCommand implements Command {
     }
     
     /**
-     * Отправляет сообщение с клавиатурой
-     * @param chatId ID чата
-     * @param text текст сообщения
-     * @param keyboard клавиатура
+     * Sends message with keyboard
+     * @param chatId chat ID
+     * @param text message text
+     * @param keyboard keyboard
      */
     protected void sendMessageWithKeyboard(long chatId, String text, Object keyboard) {
         try {

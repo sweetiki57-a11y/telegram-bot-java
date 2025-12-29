@@ -5,7 +5,7 @@ import com.example.telegrambot.factory.KeyboardFactory;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 
 /**
- * Команда для отправки приветственного сообщения
+ * Command for sending welcome message
  */
 public class SendWelcomeCommand extends BaseCommand {
     
@@ -15,18 +15,18 @@ public class SendWelcomeCommand extends BaseCommand {
     
     @Override
     public void execute(long chatId) {
-        String text = "👽 *Добро пожаловать в Inoplanetane!* 👽\n\n" +
-                "🚀 *Добро пожаловать в Inoplanetane!* 🚀\n\n" +
-                "Мы - ваш надежный проводник в мир качественных товаров и услуг!\n\n" +
-                "✨ *Что мы предлагаем:*\n" +
-                "• 🛒 Шопы - проверенные магазины\n" +
-                "• 💰 Обменники - безопасные обмены\n" +
-                "• 🔍 Поиск по категориям - быстрый поиск\n" +
-                "• 📄 Шапка - все каналы и контакты\n" +
-                "• 🏆 Топ - лучшие магазины\n\n" +
-                "Используйте кнопки меню для навигации!";
+        String text = "👽 *Welcome to Inoplanetane!* 👽\n\n" +
+                "🚀 *Welcome to Inoplanetane!* 🚀\n\n" +
+                "We are your reliable guide to quality products and services!\n\n" +
+                "✨ *What we offer:*\n" +
+                "• 🛒 Shops - verified stores\n" +
+                "• 💰 Exchangers - secure exchanges\n" +
+                "• 🔍 Category Search - quick search\n" +
+                "• 📄 Header - all channels and contacts\n" +
+                "• 🏆 Top - best stores\n\n" +
+                "Use menu buttons for navigation!";
         
-        // Создаем клавиатуру
+        // Create keyboard
         ReplyKeyboardMarkup keyboard = KeyboardFactory.createMainKeyboard();
         
         sendMessageWithKeyboard(chatId, text, keyboard);
@@ -34,6 +34,6 @@ public class SendWelcomeCommand extends BaseCommand {
     
     @Override
     public String getDescription() {
-        return "Показать приветственное сообщение";
+        return "Show welcome message";
     }
 }

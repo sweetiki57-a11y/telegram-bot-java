@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 /**
- * Класс для представления заказа
+ * Class for representing an order
  */
 public class Order {
     private String id;
@@ -16,12 +16,12 @@ public class Order {
     private String customerInfo;
     
     public enum OrderStatus {
-        PENDING,    // Ожидает подтверждения
-        CONFIRMED,  // Подтвержден
-        PROCESSING, // В обработке
-        SHIPPED,    // Отправлен
-        DELIVERED,  // Доставлен
-        CANCELLED   // Отменен
+        PENDING,    // Awaiting confirmation
+        CONFIRMED,  // Confirmed
+        PROCESSING, // Processing
+        SHIPPED,    // Shipped
+        DELIVERED,  // Delivered
+        CANCELLED   // Cancelled
     }
     
     public Order(String id, long userId, Map<String, Integer> items, double totalAmount) {

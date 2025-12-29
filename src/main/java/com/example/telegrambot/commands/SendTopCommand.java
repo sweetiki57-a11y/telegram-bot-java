@@ -5,7 +5,7 @@ import com.example.telegrambot.factory.KeyboardFactory;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
 /**
- * Команда для отправки топа шопов
+ * Command for sending top shops
  */
 public class SendTopCommand extends BaseCommand {
     
@@ -15,10 +15,10 @@ public class SendTopCommand extends BaseCommand {
     
     @Override
     public void execute(long chatId) {
-        String text = "🏆 Топ-5 лучших шопов на сегодня:\n\n" +
-                      "Выберите магазин из списка ниже:";
+        String text = "🏆 Top-5 Best Shops Today:\n\n" +
+                      "Select a store from the list below:";
         
-        // Создаем inline клавиатуру с топ-5 шопов
+        // Create inline keyboard with top-5 shops
         InlineKeyboardMarkup markup = KeyboardFactory.createTopShopsKeyboard();
         
         sendMessageWithKeyboard(chatId, text, markup);
@@ -26,7 +26,7 @@ public class SendTopCommand extends BaseCommand {
     
     @Override
     public String getDescription() {
-        return "Показать топ-5 лучших шопов";
+        return "Show top-5 best shops";
     }
 }
 

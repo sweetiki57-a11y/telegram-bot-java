@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Менеджер команд
- * Реализует паттерн Command для централизованного управления командами
+ * Command manager
+ * Implements Command pattern for centralized command management
  */
 public class CommandManager {
     private final Map<String, Command> commands;
@@ -20,29 +20,29 @@ public class CommandManager {
     }
     
     /**
-     * Инициализирует все команды
+     * Initializes all commands
      */
     private void initializeCommands() {
-        // Основные команды
+        // Main commands
         commands.put("/start", new SendWelcomeCommand(bot));
         commands.put("/menu", new SendMainMenuCommand(bot));
         commands.put("/help", new SendHelpCommand(bot));
         commands.put("/admin", new AdminCommand(bot));
         
-        // Команды кнопок
-        commands.put("🛒 Шопы", new SendShopsCommand(bot));
-        commands.put("💰 Обменники", new SendExchangersCommand(bot));
-        commands.put("🔍 Поиск по категориям", new SendSearchPromptCommand(bot));
-        commands.put("📄 Шапка", new SendHeaderCommand(bot));
-        commands.put("🏆 Топ", new SendTopCommand(bot));
-        commands.put("📋 Меню", new SendMainMenuCommand(bot));
+        // Button commands
+        commands.put("🛒 Shops", new SendShopsCommand(bot));
+        commands.put("💰 Exchangers", new SendExchangersCommand(bot));
+        commands.put("🔍 Category Search", new SendSearchPromptCommand(bot));
+        commands.put("📄 Header", new SendHeaderCommand(bot));
+        commands.put("🏆 Top", new SendTopCommand(bot));
+        commands.put("📋 Menu", new SendMainMenuCommand(bot));
     }
     
     /**
-     * Выполняет команду по ключу
-     * @param commandKey ключ команды
-     * @param chatId ID чата
-     * @return true если команда найдена и выполнена
+     * Executes command by key
+     * @param commandKey command key
+     * @param chatId chat ID
+     * @return true if command found and executed
      */
     public boolean executeCommand(String commandKey, long chatId) {
         Command command = commands.get(commandKey);
@@ -54,18 +54,18 @@ public class CommandManager {
     }
     
     /**
-     * Проверяет, существует ли команда
-     * @param commandKey ключ команды
-     * @return true если команда существует
+     * Checks if command exists
+     * @param commandKey command key
+     * @return true if command exists
      */
     public boolean hasCommand(String commandKey) {
         return commands.containsKey(commandKey);
     }
     
     /**
-     * Получает описание команды
-     * @param commandKey ключ команды
-     * @return описание команды или null если команда не найдена
+     * Gets command description
+     * @param commandKey command key
+     * @return command description or null if not found
      */
     public String getCommandDescription(String commandKey) {
         Command command = commands.get(commandKey);
@@ -73,8 +73,8 @@ public class CommandManager {
     }
     
     /**
-     * Получает все доступные команды
-     * @return Map с командами
+     * Gets all available commands
+     * @return Map with commands
      */
     public Map<String, Command> getAllCommands() {
         return new HashMap<>(commands);

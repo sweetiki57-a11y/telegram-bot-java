@@ -4,7 +4,7 @@ import com.example.telegrambot.AdminPanel;
 import com.example.telegrambot.MyTelegramBot;
 
 /**
- * Команда для админ панели
+ * Command for admin panel
  */
 public class AdminCommand extends BaseCommand {
     
@@ -14,16 +14,16 @@ public class AdminCommand extends BaseCommand {
     
     @Override
     public void execute(long chatId) {
-        // Используем существующую AdminPanel
+        // Use existing AdminPanel
         if (AdminPanel.isAdmin(chatId)) {
             AdminPanel.showAdminPanel(bot, chatId);
         } else {
-            sendMessage(chatId, "❌ У вас нет прав администратора.");
+            sendMessage(chatId, "❌ You don't have administrator rights.");
         }
     }
     
     @Override
     public String getDescription() {
-        return "Показать админ панель";
+        return "Show admin panel";
     }
 }

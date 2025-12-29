@@ -5,7 +5,7 @@ import com.example.telegrambot.factory.KeyboardFactory;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
 /**
- * Команда для отправки списка обменников
+ * Command for sending exchangers list
  */
 public class SendExchangersCommand extends BaseCommand {
     
@@ -15,11 +15,11 @@ public class SendExchangersCommand extends BaseCommand {
     
     @Override
     public void execute(long chatId) {
-        String text = "💰 *Обменники*\n\n" +
-                "🔄 *Доступные обменники:*\n\n" +
-                "Выберите обменник для перехода:";
+        String text = "💰 *Exchangers*\n\n" +
+                "🔄 *Available Exchangers:*\n\n" +
+                "Select an exchanger to proceed:";
         
-        // Создаем inline клавиатуру с кнопками-ссылками
+        // Create inline keyboard with link buttons
         InlineKeyboardMarkup markup = KeyboardFactory.createExchangersKeyboard();
         
         sendMessageWithKeyboard(chatId, text, markup);
@@ -27,6 +27,6 @@ public class SendExchangersCommand extends BaseCommand {
     
     @Override
     public String getDescription() {
-        return "Показать список всех обменников";
+        return "Show list of all exchangers";
     }
 }

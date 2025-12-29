@@ -6,7 +6,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Менеджер для работы с заказами
+ * Manager for working with orders
  */
 public class OrderManager {
     private static final AtomicLong orderIdCounter = new AtomicLong(1);
@@ -14,7 +14,7 @@ public class OrderManager {
     private static final Map<Long, List<String>> userOrders = new HashMap<>();
     
     /**
-     * Создать новый заказ
+     * Create new order
      */
     public static String createOrder(long userId, Map<String, Integer> items, double totalAmount) {
         String orderId = "ORDER_" + orderIdCounter.getAndIncrement() + "_" + System.currentTimeMillis();
@@ -28,14 +28,14 @@ public class OrderManager {
     }
     
     /**
-     * Получить заказ по ID
+     * Get order by ID
      */
     public static Order getOrder(String orderId) {
         return orders.get(orderId);
     }
     
     /**
-     * Получить все заказы пользователя
+     * Get all user orders
      */
     public static List<Order> getUserOrders(long userId) {
         List<String> orderIds = userOrders.getOrDefault(userId, new ArrayList<>());
@@ -48,14 +48,14 @@ public class OrderManager {
             }
         }
         
-        // Сортируем по дате создания (новые сверху)
+        // Sort by creation date (newest first)
         userOrderList.sort((o1, o2) -> o2.getCreatedAt().compareTo(o1.getCreatedAt()));
         
         return userOrderList;
     }
     
     /**
-     * Получить все заказы (для админа)
+     * Get all orders (for admin)
      */
     public static List<Order> getAllOrders() {
         List<Order> allOrders = new ArrayList<>(orders.values());
@@ -64,7 +64,7 @@ public class OrderManager {
     }
     
     /**
-     * Обновить статус заказа
+     * Update order status
      */
     public static boolean updateOrderStatus(String orderId, Order.OrderStatus newStatus) {
         Order order = orders.get(orderId);
@@ -76,7 +76,7 @@ public class OrderManager {
     }
     
     /**
-     * Получить статистику заказов
+     * Get order statistics
      */
     public static Map<String, Object> getOrderStats() {
         Map<String, Object> stats = new HashMap<>();
@@ -127,17 +127,17 @@ public class OrderManager {
     }
     
     /**
-     * Форматировать заказ для отображения
+     * Format order for display
      */
     public static String formatOrder(Order order, Map<String, Product> products) {
         StringBuilder orderText = new StringBuilder();
         
-        orderText.append("📦 Заказ #").append(order.getId()).append("\n");
-        orderText.append("📅 Дата: ").append(order.getCreatedAt().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"))).append("\n");
-        orderText.append("💰 Сумма: ").append(String.format("%.2f", order.getTotalAmount())).append("₽\n");
-        orderText.append("📊 Статус: ").append(getStatusEmoji(order.getStatus())).append(" ").append(getStatusText(order.getStatus())).append("\n\n");
+        orderText.append("📦 Order #").append(order.getId()).append("\n");
+        orderText.append("📅 Date: ").append(order.getCreatedAt().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"))).append("\n");
+        orderText.append("💰 Amount: ").append(String.format("%.2f", order.getTotalAmount())).append("₽\n");
+        orderText.append("📊 Status: ").append(getStatusEmoji(order.getStatus())).append(" ").append(getStatusText(order.getStatus())).append("\n\n");
         
-        orderText.append("🛍️ Товары:\n");
+        orderText.append("🛍️ Products:\n");
         for (Map.Entry<String, Integer> entry : order.getItems().entrySet()) {
             Product product = products.get(entry.getKey());
             if (product != null) {
@@ -165,13 +165,13 @@ public class OrderManager {
     
     private static String getStatusText(Order.OrderStatus status) {
         switch (status) {
-            case PENDING: return "Ожидает подтверждения";
-            case CONFIRMED: return "Подтвержден";
-            case PROCESSING: return "В обработке";
-            case SHIPPED: return "Отправлен";
-            case DELIVERED: return "Доставлен";
-            case CANCELLED: return "Отменен";
-            default: return "Неизвестно";
+            case PENDING: return "Pending";
+            case CONFIRMED: return "Confirmed";
+            case PROCESSING: return "Processing";
+            case SHIPPED: return "Shipped";
+            case DELIVERED: return "Delivered";
+            case CANCELLED: return "Cancelled";
+            default: return "Unknown";
         }
     }
 }

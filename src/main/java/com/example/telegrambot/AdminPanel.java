@@ -8,105 +8,105 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.util.*;
 
 /**
- * Класс для админ-панели управления товарами
+ * Class for admin panel product management
  */
 public class AdminPanel {
     
-    // Список админов (в реальном приложении лучше хранить в базе данных)
+    // List of admins (in real application better to store in database)
     private static final Set<Long> ADMIN_IDS = new HashSet<>();
     
     static {
-        // Добавьте сюда ID администраторов
+        // Add administrator IDs here
         // ADMIN_IDS.add(123456789L);
     }
     
     /**
-     * Проверить, является ли пользователь администратором
+     * Check if user is administrator
      */
     public static boolean isAdmin(long userId) {
         return ADMIN_IDS.contains(userId);
     }
     
     /**
-     * Добавить администратора
+     * Add administrator
      */
     public static void addAdmin(long userId) {
         ADMIN_IDS.add(userId);
     }
     
     /**
-     * Удалить администратора
+     * Remove administrator
      */
     public static void removeAdmin(long userId) {
         ADMIN_IDS.remove(userId);
     }
     
     /**
-     * Показать админ-панель
+     * Show admin panel
      */
     public static void showAdminPanel(MyTelegramBot bot, long chatId) {
         if (!isAdmin(chatId)) {
-            bot.sendMessage(chatId, "❌ У вас нет прав администратора.");
+            bot.sendMessage(chatId, "❌ You don't have administrator rights.");
             return;
         }
         
-        String adminText = "🔧 Админ-панель\n\n" +
-                "Выберите действие:";
+        String adminText = "🔧 Admin Panel\n\n" +
+                "Select an action:";
         
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         
-        // Кнопки управления товарами
+        // Product management buttons
         List<InlineKeyboardButton> productsRow = new ArrayList<>();
         InlineKeyboardButton addProductButton = new InlineKeyboardButton();
-        addProductButton.setText("➕ Добавить товар");
+        addProductButton.setText("➕ Add Product");
         addProductButton.setCallbackData("admin_add_product");
         productsRow.add(addProductButton);
         
         InlineKeyboardButton listProductsButton = new InlineKeyboardButton();
-        listProductsButton.setText("📋 Список товаров");
+        listProductsButton.setText("📋 Product List");
         listProductsButton.setCallbackData("admin_list_products");
         productsRow.add(listProductsButton);
         keyboard.add(productsRow);
         
-        // Кнопки управления категориями
+        // Category management buttons
         List<InlineKeyboardButton> categoriesRow = new ArrayList<>();
         InlineKeyboardButton addCategoryButton = new InlineKeyboardButton();
-        addCategoryButton.setText("📁 Добавить категорию");
+        addCategoryButton.setText("📁 Add Category");
         addCategoryButton.setCallbackData("admin_add_category");
         categoriesRow.add(addCategoryButton);
         
         InlineKeyboardButton listCategoriesButton = new InlineKeyboardButton();
-        listCategoriesButton.setText("📂 Список категорий");
+        listCategoriesButton.setText("📂 Category List");
         listCategoriesButton.setCallbackData("admin_list_categories");
         categoriesRow.add(listCategoriesButton);
         keyboard.add(categoriesRow);
         
-        // Кнопки статистики
+        // Statistics buttons
         List<InlineKeyboardButton> statsRow = new ArrayList<>();
         InlineKeyboardButton statsButton = new InlineKeyboardButton();
-        statsButton.setText("📊 Статистика");
+        statsButton.setText("📊 Statistics");
         statsButton.setCallbackData("admin_stats");
         statsRow.add(statsButton);
         
         InlineKeyboardButton ordersButton = new InlineKeyboardButton();
-        ordersButton.setText("📦 Заказы");
+        ordersButton.setText("📦 Orders");
         ordersButton.setCallbackData("admin_orders");
         statsRow.add(ordersButton);
         keyboard.add(statsRow);
         
-        // Кнопка обновления товаров
+        // Product refresh button
         List<InlineKeyboardButton> updateRow = new ArrayList<>();
         InlineKeyboardButton updateButton = new InlineKeyboardButton();
-        updateButton.setText("🔄 Обновить товары");
+        updateButton.setText("🔄 Refresh Products");
         updateButton.setCallbackData("admin_refresh_products");
         updateRow.add(updateButton);
         keyboard.add(updateRow);
         
-        // Кнопка "Назад"
+        // Back button
         List<InlineKeyboardButton> backRow = new ArrayList<>();
         InlineKeyboardButton backButton = new InlineKeyboardButton();
-        backButton.setText("⬅️ Назад в меню");
+        backButton.setText("⬅️ Back to Menu");
         backButton.setCallbackData("back_to_main_menu");
         backRow.add(backButton);
         keyboard.add(backRow);
@@ -126,15 +126,15 @@ public class AdminPanel {
     }
     
     /**
-     * Показать список всех товаров
+     * Show list of all products
      */
     public static void showProductsList(MyTelegramBot bot, long chatId, Map<String, List<Product>> categories) {
         if (!isAdmin(chatId)) {
-            bot.sendMessage(chatId, "❌ У вас нет прав администратора.");
+            bot.sendMessage(chatId, "❌ You don't have administrator rights.");
             return;
         }
         
-        StringBuilder productsText = new StringBuilder("📋 Список всех товаров:\n\n");
+        StringBuilder productsText = new StringBuilder("📋 List of All Products:\n\n");
         
         for (Map.Entry<String, List<Product>> entry : categories.entrySet()) {
             String category = entry.getKey();
@@ -146,7 +146,7 @@ public class AdminPanel {
                 productsText.append("• ").append(product.getName())
                         .append(" (ID: ").append(product.getId()).append(")")
                         .append(" - ").append(product.getPrice()).append("₽")
-                        .append(" [Остаток: ").append(product.getStock()).append("]\n");
+                        .append(" [Stock: ").append(product.getStock()).append("]\n");
             }
             productsText.append("\n");
         }
@@ -154,10 +154,10 @@ public class AdminPanel {
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         
-        // Кнопка "Назад в админ-панель"
+        // Back to admin panel button
         List<InlineKeyboardButton> backRow = new ArrayList<>();
         InlineKeyboardButton backButton = new InlineKeyboardButton();
-        backButton.setText("⬅️ Назад в админ-панель");
+        backButton.setText("⬅️ Back to Admin Panel");
         backButton.setCallbackData("admin_panel");
         backRow.add(backButton);
         keyboard.add(backRow);
@@ -177,31 +177,31 @@ public class AdminPanel {
     }
     
     /**
-     * Показать список категорий
+     * Show list of categories
      */
     public static void showCategoriesList(MyTelegramBot bot, long chatId, Map<String, List<Product>> categories) {
         if (!isAdmin(chatId)) {
-            bot.sendMessage(chatId, "❌ У вас нет прав администратора.");
+            bot.sendMessage(chatId, "❌ You don't have administrator rights.");
             return;
         }
         
-        StringBuilder categoriesText = new StringBuilder("📂 Список категорий:\n\n");
+        StringBuilder categoriesText = new StringBuilder("📂 Category List:\n\n");
         
         for (Map.Entry<String, List<Product>> entry : categories.entrySet()) {
             String category = entry.getKey();
             List<Product> products = entry.getValue();
             
             categoriesText.append("📁 ").append(category)
-                    .append(" (").append(products.size()).append(" товаров)\n");
+                    .append(" (").append(products.size()).append(" products)\n");
         }
         
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         
-        // Кнопка "Назад в админ-панель"
+        // Back to admin panel button
         List<InlineKeyboardButton> backRow = new ArrayList<>();
         InlineKeyboardButton backButton = new InlineKeyboardButton();
-        backButton.setText("⬅️ Назад в админ-панель");
+        backButton.setText("⬅️ Back to Admin Panel");
         backButton.setCallbackData("admin_panel");
         backRow.add(backButton);
         keyboard.add(backRow);
@@ -221,11 +221,11 @@ public class AdminPanel {
     }
     
     /**
-     * Показать статистику
+     * Show statistics
      */
     public static void showStats(MyTelegramBot bot, long chatId, Map<String, List<Product>> categories) {
         if (!isAdmin(chatId)) {
-            bot.sendMessage(chatId, "❌ У вас нет прав администратора.");
+            bot.sendMessage(chatId, "❌ You don't have administrator rights.");
             return;
         }
         
@@ -241,12 +241,12 @@ public class AdminPanel {
             }
         }
         
-        String statsText = "📊 Статистика магазина:\n\n" +
-                "📦 Всего товаров: " + totalProducts + "\n" +
-                "📋 Всего категорий: " + categories.size() + "\n" +
-                "📦 Общий остаток: " + totalStock + " шт.\n" +
-                "💰 Общая стоимость: " + String.format("%.2f", totalValue) + "₽\n\n" +
-                "📁 По категориям:\n";
+        String statsText = "📊 Store Statistics:\n\n" +
+                "📦 Total Products: " + totalProducts + "\n" +
+                "📋 Total Categories: " + categories.size() + "\n" +
+                "📦 Total Stock: " + totalStock + " pcs.\n" +
+                "💰 Total Value: " + String.format("%.2f", totalValue) + "₽\n\n" +
+                "📁 By Categories:\n";
         
         for (Map.Entry<String, List<Product>> entry : categories.entrySet()) {
             String category = entry.getKey();
@@ -254,17 +254,17 @@ public class AdminPanel {
             int categoryStock = products.stream().mapToInt(Product::getStock).sum();
             double categoryValue = products.stream().mapToDouble(p -> p.getPrice() * p.getStock()).sum();
             
-            statsText += "• " + category + ": " + products.size() + " товаров, " +
-                    categoryStock + " шт., " + String.format("%.2f", categoryValue) + "₽\n";
+            statsText += "• " + category + ": " + products.size() + " products, " +
+                    categoryStock + " pcs., " + String.format("%.2f", categoryValue) + "₽\n";
         }
         
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         
-        // Кнопка "Назад в админ-панель"
+        // Back to admin panel button
         List<InlineKeyboardButton> backRow = new ArrayList<>();
         InlineKeyboardButton backButton = new InlineKeyboardButton();
-        backButton.setText("⬅️ Назад в админ-панель");
+        backButton.setText("⬅️ Back to Admin Panel");
         backButton.setCallbackData("admin_panel");
         backRow.add(backButton);
         keyboard.add(backRow);
@@ -284,24 +284,24 @@ public class AdminPanel {
     }
     
     /**
-     * Показать список заказов для админа
+     * Show orders list for admin
      */
     public static void showOrdersList(MyTelegramBot bot, long chatId) {
         if (!isAdmin(chatId)) {
-            bot.sendMessage(chatId, "❌ У вас нет прав администратора.");
+            bot.sendMessage(chatId, "❌ You don't have administrator rights.");
             return;
         }
         
         List<Order> orders = OrderManager.getAllOrders();
         
         if (orders.isEmpty()) {
-            bot.sendMessage(chatId, "📦 Заказов пока нет.");
+            bot.sendMessage(chatId, "📦 No orders yet.");
             return;
         }
         
-        StringBuilder ordersText = new StringBuilder("📦 Все заказы:\n\n");
+        StringBuilder ordersText = new StringBuilder("📦 All Orders:\n\n");
         
-        // Создаем карту товаров для форматирования
+        // Create product map for formatting
         Map<String, Product> productsMap = new HashMap<>();
         for (List<Product> productList : bot.getCategories().values()) {
             for (Product product : productList) {
@@ -316,10 +316,10 @@ public class AdminPanel {
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         
-        // Кнопка "Назад в админ-панель"
+        // Back to admin panel button
         List<InlineKeyboardButton> backRow = new ArrayList<>();
         InlineKeyboardButton backButton = new InlineKeyboardButton();
-        backButton.setText("⬅️ Назад в админ-панель");
+        backButton.setText("⬅️ Back to Admin Panel");
         backButton.setCallbackData("admin_panel");
         backRow.add(backButton);
         keyboard.add(backRow);
@@ -339,40 +339,40 @@ public class AdminPanel {
     }
     
     /**
-     * Обновить товары (сгенерировать новые случайные товары)
+     * Refresh products (generate new random products)
      */
     public static void refreshProducts(MyTelegramBot bot, long chatId) {
         if (!isAdmin(chatId)) {
-            bot.sendMessage(chatId, "❌ У вас нет прав администратора.");
+            bot.sendMessage(chatId, "❌ You don't have administrator rights.");
             return;
         }
         
-        // Очищаем существующие товары
+        // Clear existing products
         bot.getCategories().clear();
         
-        // Генерируем новые случайные товары
+        // Generate new random products
         bot.getCategories().putAll(ProductGenerator.generateAllRandomProducts());
         
-        // Добавляем популярные товары
+        // Add popular products
         bot.addPopularProducts();
         
-        String refreshText = "🔄 *Товары обновлены!*\n\n" +
-                "✨ Сгенерированы новые случайные товары для всех категорий\n" +
-                "📊 Общее количество товаров: " + getTotalProductsCount(bot) + "\n\n" +
-                "Категории обновлены:\n";
+        String refreshText = "🔄 *Products Updated!*\n\n" +
+                "✨ Generated new random products for all categories\n" +
+                "📊 Total Products: " + getTotalProductsCount(bot) + "\n\n" +
+                "Categories updated:\n";
         
         for (String category : bot.getCategories().keySet()) {
             int count = bot.getCategories().get(category).size();
-            refreshText += "• " + category + ": " + count + " товаров\n";
+            refreshText += "• " + category + ": " + count + " products\n";
         }
         
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         
-        // Кнопка "Назад в админ-панель"
+        // Back to admin panel button
         List<InlineKeyboardButton> backRow = new ArrayList<>();
         InlineKeyboardButton backButton = new InlineKeyboardButton();
-        backButton.setText("⬅️ Назад в админ-панель");
+        backButton.setText("⬅️ Back to Admin Panel");
         backButton.setCallbackData("admin_panel");
         backRow.add(backButton);
         keyboard.add(backRow);
