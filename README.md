@@ -1,146 +1,131 @@
-# Telegram Bot для онлайн продаж
+# Telegram E-Commerce Bot
 
-Этот проект представляет собой телеграм бота для онлайн продаж с функционалом каталога товаров, корзины покупок и оформления заказов.
+A professional Telegram bot for online store management with product catalog, shopping cart, and order processing capabilities.
 
-## Функциональность
+## 🚀 Features
 
-- 🛍️ Каталог товаров с категориями
-- 🛒 Корзина покупок
-- 📋 Система заказов
-- 💳 Оформление заказов
-- 📱 Удобное меню навигации
+- 🛍️ **Product Catalog** - Organized product categories with search functionality
+- 🛒 **Shopping Cart** - Add, remove, and manage items
+- 📋 **Order Management** - Complete order processing system
+- 👤 **Admin Panel** - Product and order management interface
+- 🔍 **Category Search** - Advanced search by product categories
+- 📊 **Statistics** - Sales and product analytics
 
-## Настройка
+## 🛠️ Technologies
 
-### 1. Создание бота в Telegram
+- **Java 11** - Core programming language
+- **Maven** - Build automation and dependency management
+- **Telegram Bot API 6.8.0** - Official Telegram Bot framework
+- **Jackson** - JSON processing
+- **SLF4J** - Logging framework
 
-1. Найдите бота @BotFather в Telegram
-2. Отправьте команду `/newbot`
-3. Следуйте инструкциям для создания бота
-4. Сохраните полученный токен
+## 📋 Architecture
 
-### 2. Конфигурация
+The bot follows a clean architecture pattern with separation of concerns:
 
-Отредактируйте файл `src/main/resources/application.properties`:
+- **Command Pattern** - Centralized command management
+- **Factory Pattern** - Keyboard and UI element creation
+- **Manager Classes** - Order and product management
+- **Modular Design** - Easy to extend and maintain
+
+## ⚙️ Setup
+
+### Prerequisites
+
+- Java 11 or higher
+- Maven 3.6+
+- Telegram Bot Token (from @BotFather)
+
+### Configuration
+
+1. Copy `application.properties.example` to `src/main/resources/application.properties`
+2. Configure your bot credentials:
 
 ```properties
 telegram.bot.username=YOUR_BOT_USERNAME
 telegram.bot.token=YOUR_BOT_TOKEN
 ```
 
-Замените `YOUR_BOT_USERNAME` и `YOUR_BOT_TOKEN` на ваши данные.
-
-### 2.1. Настройка администраторов
-
-Для добавления администраторов отредактируйте файл `src/main/java/com/example/telegrambot/AdminPanel.java`:
+3. Add admin IDs in `AdminPanel.java`:
 
 ```java
-static {
-    // Добавьте сюда ID администраторов
-    ADMIN_IDS.add(123456789L); // Замените на ваш Telegram ID
-}
+ADMIN_IDS.add(YOUR_TELEGRAM_ID);
 ```
 
-Чтобы узнать свой Telegram ID, напишите боту @userinfobot.
+### Running the Bot
 
-### 3. Запуск
-
-#### Быстрый запуск
+**Quick Start:**
 ```bash
-# Сделать скрипт исполняемым (если еще не сделано)
 chmod +x run.sh
-
-# Запустить бота
 ./run.sh
 ```
 
-#### Ручной запуск
+**Manual:**
 ```bash
-# Сборка проекта
 mvn clean compile
-
-# Запуск бота
 mvn exec:java
 ```
 
-## Структура проекта
+## 📁 Project Structure
 
 ```
 src/main/java/com/example/telegrambot/
-├── TelegramBotApplication.java  # Главный класс приложения
-├── MyTelegramBot.java          # Основной класс бота
-├── Product.java                # Модель товара
-├── Cart.java                   # Модель корзины
-├── Order.java                  # Модель заказа
-├── OrderManager.java           # Менеджер заказов
-├── AdminPanel.java             # Админ-панель
-└── Config.java                 # Конфигурация
-
-src/main/resources/
-└── application.properties      # Настройки бота
+├── TelegramBotApplication.java  # Application entry point
+├── MyTelegramBot.java          # Main bot logic
+├── commands/                   # Command handlers
+│   ├── CommandManager.java     # Command dispatcher
+│   └── BaseCommand.java        # Base command class
+├── factory/
+│   └── KeyboardFactory.java    # UI keyboard factory
+├── Product.java                # Product model
+├── Cart.java                   # Shopping cart model
+├── Order.java                  # Order model
+├── OrderManager.java           # Order management
+└── AdminPanel.java             # Admin interface
 ```
 
-## Архитектура
+## 🎯 Bot Commands
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Telegram Bot API                         │
-└─────────────────────┬───────────────────────────────────────┘
-                      │
-┌─────────────────────▼───────────────────────────────────────┐
-│                MyTelegramBot                                │
-│  ┌─────────────────┐  ┌─────────────────┐                  │
-│  │   User Commands │  │  Admin Commands │                  │
-│  │   - /start      │  │  - /admin       │                  │
-│  │   - /menu       │  │                 │                  │
-│  │   - /cart       │  │                 │                  │
-│  │   - /orders     │  │                 │                  │
-│  └─────────────────┘  └─────────────────┘                  │
-└─────────────────────┬───────────────────────────────────────┘
-                      │
-        ┌─────────────┼─────────────┐
-        │             │             │
-┌───────▼──────┐ ┌───▼────┐ ┌──────▼──────┐
-│   Product    │ │  Cart  │ │    Order    │
-│   Management │ │Management│ │ Management  │
-└──────────────┘ └────────┘ └─────────────┘
-        │             │             │
-        └─────────────┼─────────────┘
-                      │
-            ┌─────────▼─────────┐
-            │   AdminPanel      │
-            │   - Product Mgmt  │
-            │   - Order Mgmt    │
-            │   - Statistics    │
-            └───────────────────┘
-```
+### User Commands
+- `/start` - Welcome message and main menu
+- `/menu` - Browse product catalog
+- `/cart` - View shopping cart
+- `/orders` - View order history
+- `/help` - Show help information
 
-## Команды бота
+### Admin Commands
+- `/admin` - Access admin panel (admin only)
 
-### Пользовательские команды
-- `/start` - Начать работу с ботом
-- `/menu` - Открыть каталог товаров
-- `/cart` - Просмотреть корзину
-- `/orders` - Просмотреть заказы
-- `/help` - Показать справку
+## 🔧 Key Components
 
-### Админские команды
-- `/admin` - Админ-панель (только для администраторов)
+### Command System
+Implements Command pattern for clean command handling and easy extensibility.
 
-## Возможности для расширения
+### Keyboard Factory
+Centralized keyboard creation using Factory pattern for consistent UI.
 
-- Интеграция с базой данных
-- Система платежей
-- Админ-панель для управления товарами
-- Система уведомлений
-- Аналитика продаж
+### Order Management
+Complete order lifecycle management with status tracking.
 
-## Требования
+### Admin Panel
+Full-featured admin interface for:
+- Product management
+- Order tracking
+- Sales statistics
+- Category management
 
-- Java 11+
-- Maven 3.6+
-- Telegram Bot Token
+## 📈 Future Enhancements
 
-## Лицензия
+- Database integration (PostgreSQL/MySQL)
+- Payment gateway integration
+- Real-time notifications
+- Advanced analytics dashboard
+- Multi-language support
+
+## 📝 License
 
 MIT License
+
+## 👨‍💻 Development
+
+Built with clean code principles, following SOLID design patterns for maintainability and scalability.

@@ -323,7 +323,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         // Кнопка "Оформить заказ"
         List<InlineKeyboardButton> orderRow = new ArrayList<>();
         InlineKeyboardButton orderButton = new InlineKeyboardButton();
-        orderButton.setText("💳 Оформить заказ");
+        orderButton.setText("✅ Оформить заказ");
         orderButton.setCallbackData("checkout");
         orderRow.add(orderButton);
         keyboard.add(orderRow);
@@ -650,9 +650,9 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         // Создаем заказ
         String orderId = OrderManager.createOrder(chatId, cart.getItems(), totalAmount);
         
-        sendMessage(chatId, "💳 Заказ #" + orderId + " оформлен!\n" +
+        sendMessage(chatId, "✅ Заказ #" + orderId + " оформлен!\n" +
                 "💰 Сумма: " + String.format("%.2f", totalAmount) + "₽\n\n" +
-                "С вами свяжется менеджер для подтверждения заказа и оплаты.");
+                "С вами свяжется менеджер для подтверждения заказа.");
         
         // Очищаем корзину после оформления заказа
         cart.clear();
