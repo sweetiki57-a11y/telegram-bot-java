@@ -46,3 +46,5 @@ src/main/resources/application.properties
 *.tar.gz
 *.rar
 
+# But keep JAR in target for deployment
+!target/*.jar
