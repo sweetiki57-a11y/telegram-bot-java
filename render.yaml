@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: telegram-bot
+    env: java
+    buildCommand: mvn clean package -DskipTests
+    startCommand: java -jar target/telegram-bot-1.0.0.jar
+    envVars:
+      - key: TELEGRAM_BOT_USERNAME
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+
