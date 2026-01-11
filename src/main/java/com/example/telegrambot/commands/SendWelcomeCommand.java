@@ -2,7 +2,9 @@ package com.example.telegrambot.commands;
 
 import com.example.telegrambot.MyTelegramBot;
 import com.example.telegrambot.factory.KeyboardFactory;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 /**
  * Command for sending welcome message
@@ -23,6 +25,7 @@ public class SendWelcomeCommand extends BaseCommand {
                 "🚀 Обнаружение пампов\n" +
                 "🆕 Торговля новыми монетами\n" +
                 "💰 Управление кошельком\n" +
+                "🛒 Авто-закупка новых токенов\n" +
                 "📊 Детальная статистика\n\n" +
                 "👤 *Начните с личного кабинета!*\n\n" +
                 "💡 *Быстрый старт:*\n" +
@@ -30,9 +33,10 @@ public class SendWelcomeCommand extends BaseCommand {
                 "2️⃣ Запустите торговлю\n" +
                 "3️⃣ Получайте прибыль автоматически";
         
-        // Create keyboard
+        // Create keyboard - принудительно обновляем
         ReplyKeyboardMarkup keyboard = KeyboardFactory.createMainKeyboard();
         
+        // Отправляем сообщение с клавиатурой
         sendMessageWithKeyboard(chatId, text, keyboard);
     }
     
