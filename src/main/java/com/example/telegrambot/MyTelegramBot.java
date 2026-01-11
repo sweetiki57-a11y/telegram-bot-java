@@ -20,6 +20,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -117,6 +118,27 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     }
     
     private void sendWelcomeMessage(long chatId) {
+        // ПРИНУДИТЕЛЬНО удаляем старую клавиатуру
+        try {
+            SendMessage removeMsg1 = new SendMessage();
+            removeMsg1.setChatId(chatId);
+            ReplyKeyboardRemove removeKeyboard = new ReplyKeyboardRemove();
+            removeKeyboard.setRemoveKeyboard(true);
+            removeMsg1.setReplyMarkup(removeKeyboard);
+            execute(removeMsg1);
+            Thread.sleep(300);
+            
+            // Отправляем пустое сообщение для очистки
+            SendMessage removeMsg2 = new SendMessage();
+            removeMsg2.setChatId(chatId);
+            removeMsg2.setText(" ");
+            removeMsg2.setReplyMarkup(removeKeyboard);
+            execute(removeMsg2);
+            Thread.sleep(300);
+        } catch (Exception e) {
+            // Игнорируем
+        }
+        
         String welcomeText = "🎉 *Добро пожаловать!*\n" +
                 "━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n" +
                 "💰 *Автоматическая торговля криптовалютой*\n\n" +
@@ -125,20 +147,38 @@ public class MyTelegramBot extends TelegramLongPollingBot {
                 "🚀 Обнаружение пампов\n" +
                 "🆕 Торговля новыми монетами\n" +
                 "💰 Управление кошельком\n" +
+                "🛒 Авто-закупка новых токенов\n" +
                 "📊 Детальная статистика\n\n" +
-                "👤 *Начните с личного кабинета!*";
+                "👤 *Начните с личного кабинета!*\n\n" +
+                "💡 *Быстрый старт:*\n" +
+                "1️⃣ Пополните баланс\n" +
+                "2️⃣ Запустите торговлю\n" +
+                "3️⃣ Получайте прибыль автоматически";
+        
+        // Создаем НОВУЮ клавиатуру с правильными кнопками
+        ReplyKeyboardMarkup keyboard = KeyboardFactory.createMainKeyboard();
         
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
         message.setText(welcomeText);
         message.setParseMode("Markdown");
-        ReplyKeyboardMarkup keyboard = KeyboardFactory.createMainKeyboard();
         message.setReplyMarkup(keyboard);
         
         try {
             execute(message);
+            
+            // Отправляем еще одно сообщение с клавиатурой для принудительного обновления
+            Thread.sleep(500);
+            SendMessage forceUpdate = new SendMessage();
+            forceUpdate.setChatId(chatId);
+            forceUpdate.setText("✅ *Меню обновлено!*\n\nНажмите кнопку: 🤖 Авто-торговля");
+            forceUpdate.setParseMode("Markdown");
+            forceUpdate.setReplyMarkup(keyboard);
+            execute(forceUpdate);
         } catch (TelegramApiException e) {
             e.printStackTrace();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
     
