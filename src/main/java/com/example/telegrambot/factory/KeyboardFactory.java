@@ -25,7 +25,6 @@ public class KeyboardFactory {
         keyboard.setOneTimeKeyboard(false); // false = клавиатура постоянная
         keyboard.setSelective(false);
         keyboard.setInputFieldPlaceholder("Выберите действие из меню");
-        keyboard.setIsPersistent(true); // Принудительно делаем постоянной
         
         List<KeyboardRow> keyboardRows = new ArrayList<>();
         
