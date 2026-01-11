@@ -41,6 +41,7 @@ public class CommandManager {
         commands.put("💰 Кошелек", new SendWalletCommand(bot));
         commands.put("👤 Личный кабинет", new SendPersonalCabinetCommand(bot));
         commands.put("🛒 Авто-закупка", new SendAutoBuyCommand(bot));
+        commands.put("🤖 Robotic", new SendAutoBuyCommand(bot)); // Robotic = Авто-закупка
         commands.put("📊 Листинг монет", new SendCoinListingCommand(bot));
     }
     

@@ -52,10 +52,10 @@ public class KeyboardFactory {
         row4.add("💰 Кошелек");
         keyboardRows.add(row4);
         
-        // Fifth row - Personal Cabinet and Auto-Buy
+        // Fifth row - Personal Cabinet and Robotic Auto-Buy
         KeyboardRow row5 = new KeyboardRow();
         row5.add("👤 Личный кабинет");
-        row5.add("🛒 Авто-закупка");
+        row5.add("🤖 Robotic");
         keyboardRows.add(row5);
         
         // Sixth row - Coin Listing

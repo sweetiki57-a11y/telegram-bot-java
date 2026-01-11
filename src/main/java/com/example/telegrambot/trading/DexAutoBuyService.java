@@ -59,7 +59,7 @@ public class DexAutoBuyService {
      */
     public void start() {
         if (isRunning) {
-            System.out.println("Авто-закупка уже запущена");
+            System.out.println("🤖 Robotic (Авто-закупка) уже запущена");
             return;
         }
         

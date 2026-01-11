@@ -64,6 +64,19 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         } catch (Exception e) {
             System.err.println("⚠️ Ошибка при запуске автоматической торговли: " + e.getMessage());
         }
+        
+        // АВТОМАТИЧЕСКИ запускаем автозакупку (Robotic) при старте бота - как cron job
+        try {
+            DexAutoBuyService autoBuyService = DexAutoBuyService.getInstance();
+            autoBuyService.setBot(this); // Устанавливаем бота для уведомлений
+            if (!autoBuyService.isRunning()) {
+                autoBuyService.start();
+                System.out.println("🤖 Robotic (Автозакупка) запущена автоматически при старте бота");
+                System.out.println("📢 Автозакупка будет анализировать токены каждую минуту и отправлять уведомления");
+            }
+        } catch (Exception e) {
+            System.err.println("⚠️ Ошибка при запуске автозакупки: " + e.getMessage());
+        }
     }
     
     @Override
