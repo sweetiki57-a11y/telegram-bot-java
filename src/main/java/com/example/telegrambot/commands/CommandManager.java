@@ -36,6 +36,10 @@ public class CommandManager {
         commands.put("📄 Header", new SendHeaderCommand(bot));
         commands.put("🏆 Top", new SendTopCommand(bot));
         commands.put("📋 Menu", new SendMainMenuCommand(bot));
+        commands.put("🤖 Авто-торговля", new SendTradingCommand(bot));
+        commands.put("💰 Кошелек", new SendWalletCommand(bot));
+        commands.put("👤 Личный кабинет", new SendPersonalCabinetCommand(bot));
+        commands.put("🛒 Авто-закупка", new SendAutoBuyCommand(bot));
     }
     
     /**

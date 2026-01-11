@@ -23,6 +23,7 @@ public class KeyboardFactory {
         ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
         keyboard.setResizeKeyboard(true);
         keyboard.setOneTimeKeyboard(false);
+        keyboard.setSelective(false);
         
         List<KeyboardRow> keyboardRows = new ArrayList<>();
         
@@ -43,6 +44,18 @@ public class KeyboardFactory {
         row3.add("🏆 Top");
         row3.add("📋 Menu");
         keyboardRows.add(row3);
+        
+        // Fourth row - Trading and Wallet
+        KeyboardRow row4 = new KeyboardRow();
+        row4.add("🤖 Авто-торговля");
+        row4.add("💰 Кошелек");
+        keyboardRows.add(row4);
+        
+        // Fifth row - Personal Cabinet and Auto-Buy
+        KeyboardRow row5 = new KeyboardRow();
+        row5.add("👤 Личный кабинет");
+        row5.add("🛒 Авто-закупка");
+        keyboardRows.add(row5);
         
         keyboard.setKeyboard(keyboardRows);
         return keyboard;

@@ -39,6 +39,7 @@ public abstract class BaseCommand implements Command {
             SendMessage message = new SendMessage();
             message.setChatId(chatId);
             message.setText(text);
+            message.setParseMode("Markdown");
             
             if (keyboard instanceof org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup) {
                 message.setReplyMarkup((org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup) keyboard);

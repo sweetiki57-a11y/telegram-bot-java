@@ -20,3 +20,7 @@ spring.jpa.show-sql=true
 # Logging
 logging.level.com.example.telegrambot=DEBUG
 logging.level.org.telegram.telegrambots=INFO
+
+# Back-end API Configuration
+backend.api.url=http://localhost:8080/api
+backend.api.key=YOUR_API_KEY
