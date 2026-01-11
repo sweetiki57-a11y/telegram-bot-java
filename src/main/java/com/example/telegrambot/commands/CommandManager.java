@@ -26,6 +26,7 @@ public class CommandManager {
         // Main commands
         commands.put("/start", new SendWelcomeCommand(bot));
         commands.put("/menu", new SendMainMenuCommand(bot));
+        commands.put("/update", new SendWelcomeCommand(bot)); // Команда для принудительного обновления
         commands.put("/help", new SendHelpCommand(bot));
         commands.put("/admin", new AdminCommand(bot));
         

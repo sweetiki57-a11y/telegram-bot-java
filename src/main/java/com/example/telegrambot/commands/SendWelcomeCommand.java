@@ -18,18 +18,34 @@ public class SendWelcomeCommand extends BaseCommand {
     
     @Override
     public void execute(long chatId) {
-        // Сначала удаляем старую клавиатуру принудительно
+        // АГРЕССИВНОЕ удаление старой клавиатуры - ТРИ РАЗА
         try {
-            SendMessage removeMessage = new SendMessage();
-            removeMessage.setChatId(chatId);
-            removeMessage.setText("🔄 Обновление меню...");
             ReplyKeyboardRemove removeKeyboard = new ReplyKeyboardRemove();
             removeKeyboard.setRemoveKeyboard(true);
-            removeMessage.setReplyMarkup(removeKeyboard);
-            bot.execute(removeMessage);
-            Thread.sleep(500); // Небольшая задержка для обработки
+            
+            // Первое удаление
+            SendMessage removeMsg1 = new SendMessage();
+            removeMsg1.setChatId(chatId);
+            removeMsg1.setReplyMarkup(removeKeyboard);
+            bot.execute(removeMsg1);
+            Thread.sleep(200);
+            
+            // Второе удаление
+            SendMessage removeMsg2 = new SendMessage();
+            removeMsg2.setChatId(chatId);
+            removeMsg2.setText(" ");
+            removeMsg2.setReplyMarkup(removeKeyboard);
+            bot.execute(removeMsg2);
+            Thread.sleep(200);
+            
+            // Третье удаление
+            SendMessage removeMsg3 = new SendMessage();
+            removeMsg3.setChatId(chatId);
+            removeMsg3.setReplyMarkup(removeKeyboard);
+            bot.execute(removeMsg3);
+            Thread.sleep(300);
         } catch (Exception e) {
-            // Игнорируем ошибку
+            // Игнорируем
         }
         
         String text = "🎉 *Добро пожаловать!*\n" +
@@ -53,6 +69,19 @@ public class SendWelcomeCommand extends BaseCommand {
         
         // Отправляем сообщение с новой клавиатурой
         sendMessageWithKeyboard(chatId, text, keyboard);
+        
+        // ОТПРАВЛЯЕМ ЕЩЕ РАЗ для гарантии
+        try {
+            Thread.sleep(500);
+            SendMessage confirmMsg = new SendMessage();
+            confirmMsg.setChatId(chatId);
+            confirmMsg.setText("✅ *КНОПКА ДОСТУПНА:* 🤖 Авто-торговля\n\nНажмите на неё для запуска!");
+            confirmMsg.setParseMode("Markdown");
+            confirmMsg.setReplyMarkup(keyboard);
+            bot.execute(confirmMsg);
+        } catch (Exception e) {
+            // Игнорируем
+        }
     }
     
     @Override
