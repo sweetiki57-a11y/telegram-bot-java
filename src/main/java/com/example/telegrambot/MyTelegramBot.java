@@ -726,6 +726,8 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             handleTradingNotifications(chatId);
         } else if (callbackData.equals("trading_back")) {
             commandManager.executeCommand("🤖 Авто-торговля", chatId);
+        } else if (callbackData.equals("refresh_coin_listing")) {
+            commandManager.executeCommand("📊 Листинг монет", chatId);
         } else if (callbackData.equals("wallet_deposit")) {
             handleWalletDeposit(chatId);
         } else if (callbackData.equals("wallet_withdraw")) {

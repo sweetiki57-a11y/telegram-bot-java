@@ -58,6 +58,11 @@ public class KeyboardFactory {
         row5.add("🛒 Авто-закупка");
         keyboardRows.add(row5);
         
+        // Sixth row - Coin Listing
+        KeyboardRow row6 = new KeyboardRow();
+        row6.add("📊 Листинг монет");
+        keyboardRows.add(row6);
+        
         keyboard.setKeyboard(keyboardRows);
         return keyboard;
     }
