@@ -70,15 +70,28 @@ public class SendWelcomeCommand extends BaseCommand {
         // Отправляем сообщение с новой клавиатурой
         sendMessageWithKeyboard(chatId, text, keyboard);
         
-        // ОТПРАВЛЯЕМ ЕЩЕ РАЗ для гарантии
+        // ОТПРАВЛЯЕМ КЛАВИАТУРУ 5 РАЗ ПОДРЯД для ПРИНУДИТЕЛЬНОГО обновления
         try {
-            Thread.sleep(500);
-            SendMessage confirmMsg = new SendMessage();
-            confirmMsg.setChatId(chatId);
-            confirmMsg.setText("✅ *КНОПКА ДОСТУПНА:* 🤖 Авто-торговля\n\nНажмите на неё для запуска!");
-            confirmMsg.setParseMode("Markdown");
-            confirmMsg.setReplyMarkup(keyboard);
-            bot.execute(confirmMsg);
+            String[] messages = {
+                "✅ *КНОПКИ ДОСТУПНЫ:*\n🤖 Авто-торговля\n🛒 Авто-закупка\n📊 Листинг монет",
+                "🎯 *НАЖМИТЕ:* 🤖 Авто-торговля для запуска автоматической торговли!",
+                "🛒 *НАЖМИТЕ:* 🛒 Авто-закупка для автоматической закупки новых токенов!",
+                "📊 *НАЖМИТЕ:* 📊 Листинг монет для просмотра перспективных монет!",
+                "🔄 *МЕНЮ ОБНОВЛЕНО!* Все кнопки доступны!"
+            };
+            
+            for (int i = 0; i < messages.length; i++) {
+                Thread.sleep(300);
+                SendMessage msg = new SendMessage();
+                msg.setChatId(chatId);
+                msg.setText(messages[i]);
+                msg.setParseMode("Markdown");
+                
+                // Создаем НОВУЮ клавиатуру каждый раз
+                ReplyKeyboardMarkup newKeyboard = KeyboardFactory.createMainKeyboard();
+                msg.setReplyMarkup(newKeyboard);
+                bot.execute(msg);
+            }
         } catch (Exception e) {
             // Игнорируем
         }
