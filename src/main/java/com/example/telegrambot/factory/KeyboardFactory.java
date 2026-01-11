@@ -24,6 +24,7 @@ public class KeyboardFactory {
         keyboard.setResizeKeyboard(true);
         keyboard.setOneTimeKeyboard(false);
         keyboard.setSelective(false);
+        keyboard.setInputFieldPlaceholder("Выберите действие из меню");
         
         List<KeyboardRow> keyboardRows = new ArrayList<>();
         

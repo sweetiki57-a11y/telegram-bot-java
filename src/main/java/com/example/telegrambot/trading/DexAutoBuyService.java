@@ -25,7 +25,12 @@ public class DexAutoBuyService {
     private MyTelegramBot bot;
     private Set<String> purchasedCoins = new HashSet<>();
     private Map<String, Long> coinPurchaseTime = new HashMap<>();
+    private Map<String, Double> coinWatchPrices = new HashMap<>(); // Цены для отслеживания пампов
+    private Set<Long> notificationSubscribers = new HashSet<>(); // Подписчики на уведомления
     private static final long HOLD_TIME_MINUTES = 30; // Держим позицию 30 минут
+    private static final double PUMP_THRESHOLD = 0.05; // 5% рост = памп, входим
+    private static final double MIN_PROFIT_EXIT = 0.10; // 10% минимальная прибыль для выхода
+    private static final double GOOD_PROFIT_EXIT = 0.15; // 15% хорошая прибыль - быстро выходим
     
     private DexAutoBuyService() {
         scheduler = Executors.newScheduledThreadPool(1);
@@ -43,6 +48,13 @@ public class DexAutoBuyService {
     }
     
     /**
+     * Добавить подписчика на уведомления
+     */
+    public void addNotificationSubscriber(long chatId) {
+        notificationSubscribers.add(chatId);
+    }
+    
+    /**
      * Запустить автоматическую закупку
      */
     public void start() {
@@ -54,11 +66,11 @@ public class DexAutoBuyService {
         isRunning = true;
         System.out.println("🛒 Запуск автоматической закупки новых токенов...");
         
-        // Сканируем и покупаем каждые 3 минуты
-        scheduler.scheduleAtFixedRate(this::scanAndBuyNewCoins, 0, 3, TimeUnit.MINUTES);
+        // Сканируем новые монеты каждую минуту (для отслеживания пампов)
+        scheduler.scheduleAtFixedRate(this::scanAndWatchNewCoins, 0, 1, TimeUnit.MINUTES);
         
-        // Проверяем позиции для продажи каждую минуту
-        scheduler.scheduleAtFixedRate(this::checkPositionsForSale, 60, 60, TimeUnit.SECONDS);
+        // Проверяем позиции для продажи каждые 30 секунд
+        scheduler.scheduleAtFixedRate(this::checkPositionsForSale, 30, 30, TimeUnit.SECONDS);
     }
     
     /**
@@ -82,92 +94,102 @@ public class DexAutoBuyService {
     }
     
     /**
-     * Сканирование и покупка новых токенов
+     * Сканирование и отслеживание новых монет (ждем пампов перед покупкой)
      */
-    private void scanAndBuyNewCoins() {
+    private void scanAndWatchNewCoins() {
         if (!isRunning) return;
         
         try {
-            System.out.println("🔍 Сканирование топ новых монет на DEX...");
+            System.out.println("🔍 Сканирование новых монет на DEX...");
             
-            // Получаем топ новых монет с DEX через Backend API
+            // Получаем топ новых монет
             List<NewCoinInfo> newCoins = getTopNewCoinsFromDex();
             
             if (newCoins.isEmpty()) {
-                System.out.println("Новых монет не найдено");
                 return;
             }
-            
-            System.out.println("✅ Найдено новых монет: " + newCoins.size());
             
             double balance = TradingManager.getAvailableBalance(0);
             if (balance < 10) {
-                System.out.println("⚠️ Недостаточно баланса для покупки");
                 return;
             }
             
-            // Покупаем топ-3 новые монеты
-            int maxCoins = Math.min(3, newCoins.size());
+            // Отслеживаем топ-5 новых монет
+            int maxCoins = Math.min(5, newCoins.size());
             for (int i = 0; i < maxCoins; i++) {
                 NewCoinInfo coin = newCoins.get(i);
                 
-                // Проверяем что еще не купили
+                // Пропускаем если уже купили
                 if (purchasedCoins.contains(coin.symbol)) {
                     continue;
                 }
                 
                 // Валидация токена
                 TokenValidator.ValidationResult validation = TokenValidator.validateToken(coin.symbol);
-                if (!validation.isValid) {
-                    System.out.println("❌ Токен " + coin.symbol + " не прошел валидацию: " + validation.reason);
+                if (!validation.isValid || validation.liquidity < 50000) {
                     continue;
                 }
                 
-                // Получаем цену
+                // Получаем текущую цену
                 Double currentPrice = PriceService.getPrice(coin.symbol);
                 if (currentPrice == null || currentPrice <= 0) {
-                    System.out.println("⚠️ Не удалось получить цену для " + coin.symbol);
                     continue;
                 }
                 
-                // Вычисляем размер позиции (10% баланса на новую монету)
-                double positionSize = balance * 0.10;
-                double amount = positionSize / currentPrice;
+                // Если монета еще не отслеживается - начинаем отслеживать
+                if (!coinWatchPrices.containsKey(coin.symbol)) {
+                    coinWatchPrices.put(coin.symbol, currentPrice);
+                    System.out.println("👀 Начато отслеживание: " + coin.symbol + " по цене " + currentPrice);
+                    continue;
+                }
                 
-                // Создаем решение о покупке
-                TradingDecision decision = new TradingDecision(
-                    TradingDecision.Action.BUY, 
-                    amount, 
-                    currentPrice,
-                    "Авто-закупка нового токена с DEX (ликвидность: " + validation.liquidity + ")",
-                    0.85 // Высокая уверенность для валидированных токенов
-                );
+                // Проверяем рост цены (памп)
+                double watchPrice = coinWatchPrices.get(coin.symbol);
+                double priceChange = (currentPrice - watchPrice) / watchPrice;
                 
-                // Покупаем
-                Trade trade = TradingManager.openTrade(coin.symbol, decision);
-                
-                if (trade != null) {
-                    purchasedCoins.add(coin.symbol);
-                    coinPurchaseTime.put(coin.symbol, System.currentTimeMillis());
+                // Если памп >= 5% - быстро входим!
+                if (priceChange >= PUMP_THRESHOLD) {
+                    System.out.println("🚀 ПАМП ОБНАРУЖЕН! " + coin.symbol + " вырос на " + 
+                        String.format("%.2f", priceChange * 100) + "%");
                     
-                    System.out.println("✅ Куплен новый токен: " + coin.symbol + " на сумму " + positionSize);
+                    // Быстро покупаем!
+                    double positionSize = balance * 0.15; // 15% баланса при пампе
+                    double amount = positionSize / currentPrice;
                     
-                    // Отправляем уведомление
-                    sendNotification("🛒 *Авто-закупка*\n\n" +
-                        "✅ Куплен новый токен:\n" +
-                        "💰 Символ: " + coin.symbol + "\n" +
-                        "💵 Сумма: " + String.format("%.2f", positionSize) + " USDT\n" +
-                        "📊 Цена: " + String.format("%.8f", currentPrice) + "\n" +
-                        "📈 Ликвидность: " + String.format("%.0f", validation.liquidity) + "\n" +
-                        "⏰ Держим позицию 30 минут");
+                    TradingDecision decision = new TradingDecision(
+                        TradingDecision.Action.BUY, 
+                        amount, 
+                        currentPrice,
+                        "🚀 ПАМП! Быстрый вход в " + coin.symbol + " (рост: " + 
+                        String.format("%.2f", priceChange * 100) + "%)",
+                        0.95 // Очень высокая уверенность при пампе
+                    );
+                    
+                    Trade trade = TradingManager.openTrade(coin.symbol, decision);
+                    
+                    if (trade != null) {
+                        purchasedCoins.add(coin.symbol);
+                        coinPurchaseTime.put(coin.symbol, System.currentTimeMillis());
+                        coinWatchPrices.remove(coin.symbol); // Убираем из отслеживания
+                        
+                        System.out.println("✅ БЫСТРЫЙ ВХОД! Куплен " + coin.symbol + " на " + positionSize);
+                        
+                        // Уведомление о покупке
+                        sendNotification("🚀 *ПАМП ОБНАРУЖЕН И КУПЛЕН!*\n\n" +
+                            "💰 Символ: *" + coin.symbol + "*\n" +
+                            "📈 Рост: *+" + String.format("%.2f", priceChange * 100) + "%*\n" +
+                            "💵 Сумма: *" + String.format("%.2f", positionSize) + " USDT*\n" +
+                            "📊 Цена входа: *" + String.format("%.8f", currentPrice) + "*\n" +
+                            "⏰ Время: " + new java.util.Date().toString());
+                    }
                 } else {
-                    System.out.println("❌ Ошибка покупки " + coin.symbol);
+                    // Обновляем цену отслеживания
+                    coinWatchPrices.put(coin.symbol, currentPrice);
                 }
             }
             
         } catch (Exception e) {
-            System.err.println("Ошибка при сканировании новых монет: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("Ошибка при сканировании: " + e.getMessage());
         }
     }
     
@@ -202,21 +224,49 @@ public class DexAutoBuyService {
                     if (trade != null) {
                         double profitPercent = ((currentPrice - trade.getEntryPrice()) / trade.getEntryPrice()) * 100;
                         
-                        // Продаем если прибыль >5% или убыток >-3%
-                        if (profitPercent >= 5.0 || profitPercent <= -3.0) {
+                        // Улучшенная логика выхода: хорошая прибыль, не минимальная
+                        boolean shouldSell = false;
+                        String sellReason = "";
+                        
+                        // Быстрый выход при хорошей прибыли (15%+)
+                        if (profitPercent >= GOOD_PROFIT_EXIT * 100) {
+                            shouldSell = true;
+                            sellReason = "🎉 ОТЛИЧНАЯ ПРИБЫЛЬ!";
+                        }
+                        // Выход при минимальной прибыли (10%+) если прошло время
+                        else if (profitPercent >= MIN_PROFIT_EXIT * 100 && minutesHeld >= 5) {
+                            shouldSell = true;
+                            sellReason = "✅ Хорошая прибыль";
+                        }
+                        // Стоп-лосс при убытке >-5%
+                        else if (profitPercent <= -5.0) {
+                            shouldSell = true;
+                            sellReason = "⚠️ Стоп-лосс";
+                        }
+                        // Выход после 30 минут если есть хоть какая-то прибыль
+                        else if (minutesHeld >= HOLD_TIME_MINUTES && profitPercent > 0) {
+                            shouldSell = true;
+                            sellReason = "⏰ Время удержания истекло";
+                        }
+                        
+                        if (shouldSell) {
                             TradingManager.closeTrade(trade.getId(), currentPrice);
                             purchasedCoins.remove(symbol);
                             coinPurchaseTime.remove(symbol);
                             
-                            System.out.println("✅ Продана позиция " + symbol + " с прибылью " + 
-                                String.format("%.2f", profitPercent) + "%");
+                            System.out.println("✅ Продана позиция " + symbol + ": " + sellReason + 
+                                " (прибыль: " + String.format("%.2f", profitPercent) + "%)");
                             
-                            // Уведомление
-                            sendNotification("💰 *Авто-продажа*\n\n" +
-                                "✅ Позиция закрыта:\n" +
-                                "📊 Символ: " + symbol + "\n" +
-                                "📈 Прибыль: " + String.format("%.2f", profitPercent) + "%\n" +
-                                "⏰ Время удержания: " + minutesHeld + " минут");
+                            // Уведомление о продаже
+                            String emoji = profitPercent >= GOOD_PROFIT_EXIT * 100 ? "🎉" : 
+                                         profitPercent >= MIN_PROFIT_EXIT * 100 ? "✅" : "⚠️";
+                            
+                            sendNotification(emoji + " *" + sellReason + "*\n\n" +
+                                "📊 Символ: *" + symbol + "*\n" +
+                                "📈 Прибыль: *" + String.format("%.2f", profitPercent) + "%*\n" +
+                                "💵 Цена входа: " + String.format("%.8f", trade.getEntryPrice()) + "\n" +
+                                "💵 Цена выхода: " + String.format("%.8f", currentPrice) + "\n" +
+                                "⏰ Время удержания: *" + minutesHeld + " минут*");
                         }
                     }
                 }
@@ -267,21 +317,30 @@ public class DexAutoBuyService {
     }
     
     /**
-     * Отправка уведомления
+     * Отправка уведомления в Telegram
      */
     private void sendNotification(String message) {
-        if (bot != null) {
-            try {
-                // Отправляем уведомление админу или всем активным пользователям
-                // Можно добавить список chatId для отправки
-                // Пока отправляем в лог и можно добавить отправку конкретным пользователям
+        if (bot == null) {
+            System.out.println("📢 Уведомление: " + message);
+            return;
+        }
+        
+        try {
+            // Отправляем всем подписчикам
+            if (!notificationSubscribers.isEmpty()) {
+                for (Long chatId : notificationSubscribers) {
+                    try {
+                        bot.sendMessage(chatId, message);
+                    } catch (Exception e) {
+                        System.err.println("Ошибка отправки уведомления пользователю " + chatId + ": " + e.getMessage());
+                    }
+                }
+            } else {
+                // Если нет подписчиков, просто логируем
                 System.out.println("📢 Уведомление: " + message);
-                
-                // TODO: Добавить отправку конкретным пользователям через bot.sendMessage(chatId, message)
-                // Можно хранить список подписчиков на уведомления
-            } catch (Exception e) {
-                System.err.println("Ошибка отправки уведомления: " + e.getMessage());
             }
+        } catch (Exception e) {
+            System.err.println("Ошибка отправки уведомления: " + e.getMessage());
         }
     }
     
