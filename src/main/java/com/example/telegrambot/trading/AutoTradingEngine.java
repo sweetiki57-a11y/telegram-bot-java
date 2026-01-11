@@ -1,6 +1,7 @@
 package com.example.telegrambot.trading;
 
 import com.example.telegrambot.trading.strategies.*;
+import com.example.telegrambot.MyTelegramBot;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -18,6 +19,8 @@ public class AutoTradingEngine {
     private final List<TradingStrategy> strategies;
     private final List<String> symbols;
     private final Map<String, TradingStrategy> symbolStrategyMap;
+    private MyTelegramBot bot; // Бот для отправки уведомлений
+    private Set<Long> notificationSubscribers = new HashSet<>(); // Подписчики на уведомления
     
     private AutoTradingEngine() {
         // Инициализируем стратегии
@@ -226,6 +229,9 @@ public class AutoTradingEngine {
                 if (shouldClose) {
                     TradingManager.closeTrade(trade.getId(), currentPrice);
                     System.out.println("🔒 Закрыта сделка " + trade.getId() + ": " + reason);
+                    
+                    // Отправляем уведомление о закрытии сделки (ВСЕ сделки - и прибыльные, и убыточные)
+                    sendTradeNotification(trade, currentPrice, profitPercent, reason);
                 }
             }
         } catch (Exception e) {
@@ -322,6 +328,27 @@ public class AutoTradingEngine {
     }
     
     /**
+     * Установить бота для отправки уведомлений
+     */
+    public void setBot(MyTelegramBot bot) {
+        this.bot = bot;
+    }
+    
+    /**
+     * Добавить подписчика на уведомления
+     */
+    public void addNotificationSubscriber(long chatId) {
+        notificationSubscribers.add(chatId);
+    }
+    
+    /**
+     * Удалить подписчика
+     */
+    public void removeNotificationSubscriber(long chatId) {
+        notificationSubscribers.remove(chatId);
+    }
+    
+    /**
      * Проверить статус
      */
     public boolean isRunning() {
@@ -358,5 +385,45 @@ public class AutoTradingEngine {
     public void removeSymbol(String symbol) {
         symbols.remove(symbol);
         symbolStrategyMap.remove(symbol);
+    }
+    
+    /**
+     * Отправка уведомления о закрытии сделки
+     */
+    private void sendTradeNotification(Trade trade, double exitPrice, double profitPercent, String reason) {
+        if (bot == null || notificationSubscribers.isEmpty()) {
+            return;
+        }
+        
+        // Определяем эмодзи и статус в зависимости от прибыли/убытка
+        String emoji;
+        String status;
+        if (profitPercent > 0) {
+            emoji = profitPercent >= 10 ? "🎉" : "✅";
+            status = "ПРИБЫЛЬ";
+        } else {
+            emoji = "❌";
+            status = "УБЫТОК";
+        }
+        
+        String message = emoji + " *СДЕЛКА ЗАКРЫТА: " + status + "*\n\n" +
+            "📊 Символ: *" + trade.getSymbol() + "*\n" +
+            "📈 Тип: *" + trade.getType() + "*\n" +
+            "💰 Прибыль/Убыток: *" + String.format("%.2f", profitPercent) + "%*\n" +
+            "💵 Цена входа: *" + String.format("%.8f", trade.getEntryPrice()) + "*\n" +
+            "💵 Цена выхода: *" + String.format("%.8f", exitPrice) + "*\n" +
+            "📝 Причина: *" + reason + "*\n" +
+            "⏰ Время удержания: *" + 
+            java.time.Duration.between(trade.getEntryTime(), java.time.LocalDateTime.now()).toMinutes() + 
+            " минут*";
+        
+        // Отправляем всем подписчикам
+        for (Long chatId : notificationSubscribers) {
+            try {
+                bot.sendMessage(chatId, message);
+            } catch (Exception e) {
+                System.err.println("Ошибка отправки уведомления пользователю " + chatId + ": " + e.getMessage());
+            }
+        }
     }
 }

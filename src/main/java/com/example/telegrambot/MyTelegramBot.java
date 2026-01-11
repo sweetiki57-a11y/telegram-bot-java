@@ -55,6 +55,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         // Автоматически запускаем торговлю при старте бота
         try {
             AutoTradingEngine engine = AutoTradingEngine.getInstance();
+            engine.setBot(this); // Устанавливаем бота для уведомлений
             if (!engine.isRunning()) {
                 engine.start();
                 System.out.println("✅ Автоматическая торговля запущена при старте бота");
@@ -681,6 +682,8 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             handleTradingTrades(chatId);
         } else if (callbackData.equals("trading_strategies")) {
             handleTradingStrategies(chatId);
+        } else if (callbackData.equals("trading_notifications")) {
+            handleTradingNotifications(chatId);
         } else if (callbackData.equals("trading_back")) {
             commandManager.executeCommand("🤖 Авто-торговля", chatId);
         } else if (callbackData.equals("wallet_deposit")) {
@@ -1177,15 +1180,24 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     
     private void handleTradingStart(long chatId) {
         AutoTradingEngine engine = AutoTradingEngine.getInstance();
+        engine.setBot(this); // Устанавливаем бота для уведомлений
+        engine.addNotificationSubscriber(chatId); // Подписываем на уведомления
+        
         if (engine.isRunning()) {
-            sendMessage(chatId, "⚠️ Автоматическая торговля уже запущена!");
+            sendMessage(chatId, "⚠️ Автоматическая торговля уже запущена!\n\n" +
+                "📢 Вы подписаны на уведомления о всех сделках (прибыльных и убыточных).");
             return;
         }
         
         engine.start();
-        sendMessage(chatId, "✅ Автоматическая торговля запущена!\n\n" +
+        sendMessage(chatId, "✅ *Автоматическая торговля запущена!*\n\n" +
             "🤖 Бот будет автоматически торговать используя умные алгоритмы.\n" +
-            "📊 Статистика обновляется в реальном времени.");
+            "📊 Статистика обновляется в реальном времени.\n\n" +
+            "📢 *Вы подписаны на уведомления!*\n" +
+            "Вы будете получать уведомления о:\n" +
+            "✅ Прибыльных сделках\n" +
+            "❌ Убыточных сделках\n" +
+            "📊 Всех закрытых позициях");
         
         // Обновляем панель торговли
         commandManager.executeCommand("🤖 Авто-торговля", chatId);
@@ -1201,6 +1213,27 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         engine.stop();
         sendMessage(chatId, "⏹️ Автоматическая торговля остановлена.\n\n" +
             "📊 Все открытые сделки будут закрыты при достижении целей.");
+        
+        // Обновляем панель торговли
+        commandManager.executeCommand("🤖 Авто-торговля", chatId);
+    }
+    
+    private void handleTradingNotifications(long chatId) {
+        AutoTradingEngine engine = AutoTradingEngine.getInstance();
+        engine.setBot(this); // Устанавливаем бота для уведомлений
+        engine.addNotificationSubscriber(chatId); // Подписываем на уведомления
+        
+        sendMessage(chatId, "✅ *Вы подписаны на уведомления!*\n\n" +
+            "📢 Теперь вы будете получать уведомления о:\n" +
+            "✅ Прибыльных сделках\n" +
+            "❌ Убыточных сделках\n" +
+            "📊 Всех закрытых позициях\n\n" +
+            "Каждое уведомление содержит:\n" +
+            "• Символ монеты\n" +
+            "• Прибыль/Убыток в %\n" +
+            "• Цену входа и выхода\n" +
+            "• Причину закрытия\n" +
+            "• Время удержания");
         
         // Обновляем панель торговли
         commandManager.executeCommand("🤖 Авто-торговля", chatId);

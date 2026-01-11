@@ -95,6 +95,14 @@ public class SendTradingCommand extends BaseCommand {
         
         keyboard.add(actionsRow);
         
+        // Кнопка уведомлений
+        List<InlineKeyboardButton> notificationsRow = new ArrayList<>();
+        InlineKeyboardButton notificationsButton = new InlineKeyboardButton();
+        notificationsButton.setText("📢 Включить уведомления");
+        notificationsButton.setCallbackData("trading_notifications");
+        notificationsRow.add(notificationsButton);
+        keyboard.add(notificationsRow);
+        
         // Кнопка назад
         List<InlineKeyboardButton> backRow = new ArrayList<>();
         InlineKeyboardButton backButton = new InlineKeyboardButton();
