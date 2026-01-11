@@ -2,6 +2,7 @@ package com.example.telegrambot.commands;
 
 import com.example.telegrambot.MyTelegramBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 /**
@@ -43,26 +44,18 @@ public abstract class BaseCommand implements Command {
             
             if (keyboard instanceof org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup) {
                 message.setReplyMarkup((org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup) keyboard);
-            } else if (keyboard instanceof org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup) {
-                ReplyKeyboardMarkup replyKeyboard = (org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup) keyboard;
-                // Принудительно обновляем клавиатуру
-                replyKeyboard.setOneTimeKeyboard(true); // Временно true для обновления
-                message.setReplyMarkup(replyKeyboard);
+            } else if (keyboard instanceof ReplyKeyboardMarkup) {
+                ReplyKeyboardMarkup replyKeyboard = (ReplyKeyboardMarkup) keyboard;
+                // Создаем копию для принудительного обновления
+                ReplyKeyboardMarkup newKeyboard = new ReplyKeyboardMarkup();
+                newKeyboard.setKeyboard(replyKeyboard.getKeyboard());
+                newKeyboard.setResizeKeyboard(true);
+                newKeyboard.setOneTimeKeyboard(false);
+                newKeyboard.setSelective(false);
+                message.setReplyMarkup(newKeyboard);
             }
             
             bot.execute(message);
-            
-            // Если это ReplyKeyboard, отправляем еще одно сообщение с постоянной клавиатурой
-            if (keyboard instanceof org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup) {
-                ReplyKeyboardMarkup replyKeyboard = (org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup) keyboard;
-                replyKeyboard.setOneTimeKeyboard(false); // Возвращаем false для постоянной клавиатуры
-                SendMessage updateMessage = new SendMessage();
-                updateMessage.setChatId(chatId);
-                updateMessage.setText("📱 *Меню обновлено!*\n\nИспользуйте кнопки ниже:");
-                updateMessage.setParseMode("Markdown");
-                updateMessage.setReplyMarkup(replyKeyboard);
-                bot.execute(updateMessage);
-            }
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
