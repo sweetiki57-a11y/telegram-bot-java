@@ -18,6 +18,20 @@ public class SendWelcomeCommand extends BaseCommand {
     
     @Override
     public void execute(long chatId) {
+        // Сначала удаляем старую клавиатуру принудительно
+        try {
+            SendMessage removeMessage = new SendMessage();
+            removeMessage.setChatId(chatId);
+            removeMessage.setText("🔄 Обновление меню...");
+            ReplyKeyboardRemove removeKeyboard = new ReplyKeyboardRemove();
+            removeKeyboard.setRemoveKeyboard(true);
+            removeMessage.setReplyMarkup(removeKeyboard);
+            bot.execute(removeMessage);
+            Thread.sleep(500); // Небольшая задержка для обработки
+        } catch (Exception e) {
+            // Игнорируем ошибку
+        }
+        
         String text = "🎉 *Добро пожаловать!*\n" +
                 "━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n" +
                 "💰 *Автоматическая торговля криптовалютой*\n\n" +
@@ -34,10 +48,10 @@ public class SendWelcomeCommand extends BaseCommand {
                 "2️⃣ Запустите торговлю\n" +
                 "3️⃣ Получайте прибыль автоматически";
         
-        // Create keyboard - принудительно обновляем
+        // Create keyboard с новыми кнопками
         ReplyKeyboardMarkup keyboard = KeyboardFactory.createMainKeyboard();
         
-        // Отправляем сообщение с клавиатурой
+        // Отправляем сообщение с новой клавиатурой
         sendMessageWithKeyboard(chatId, text, keyboard);
     }
     
